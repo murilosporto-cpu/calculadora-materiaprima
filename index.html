@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domino's Pizza - Calculadora de Produção</title>
+    <meta name="description" content="Calculadora profissional de insumos para produção de massas de pizza com base em fichas técnicas e rendimentos por bandeja.">
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Background decorative glows -->
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="brand-text-area">
+                    <h1 class="brand-title">Domino's Pizza</h1>
+                    <p class="subtitle">Calculadora de Matéria-Prima</p>
+                </div>
+            </div>
+            <div class="badge-system">
+                <span class="badge">Arquiteto de Produção v1.0</span>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <!-- Left Panel: Inputs -->
+            <section class="card-panel panel-inputs">
+                <div class="panel-header">
+                    <h2>Planejamento de Produção</h2>
+                    <p>Insira a quantidade de bandejas planejada para cada tipo de massa.</p>
+                </div>
+                
+                <form id="production-form" class="form-grid" onsubmit="event.preventDefault();">
+                    <!-- Mass 7 -->
+                    <div class="input-group">
+                        <label for="input-mass-7">
+                            <span class="mass-name">Massa 7"</span>
+                            <span class="mass-meta">Tradicional • 10 bandejas/batch</span>
+                        </label>
+                        <div class="input-control">
+                            <input type="number" id="input-mass-7" min="0" value="0" placeholder="0" class="input-field">
+                            <span class="input-unit">bandejas</span>
+                        </div>
+                        <div class="weight-preview">Peso calculado: <span id="preview-mass-7">0.000</span> kg</div>
+                    </div>
+
+                    <!-- Mass 8.5 -->
+                    <div class="input-group">
+                        <label for="input-mass-85">
+                            <span class="mass-name">Massa 8.5"</span>
+                            <span class="mass-meta">Tradicional • 6 bandejas/batch</span>
+                        </label>
+                        <div class="input-control">
+                            <input type="number" id="input-mass-85" min="0" value="0" placeholder="0" class="input-field">
+                            <span class="input-unit">bandejas</span>
+                        </div>
+                        <div class="weight-preview">Peso calculado: <span id="preview-mass-85">0.000</span> kg</div>
+                    </div>
+
+                    <!-- Mass 11.5 -->
+                    <div class="input-group">
+                        <label for="input-mass-115">
+                            <span class="mass-name">Massa 11.5"</span>
+                            <span class="mass-meta">Tradicional • 5 bandejas/batch</span>
+                        </label>
+                        <div class="input-control">
+                            <input type="number" id="input-mass-115" min="0" value="0" placeholder="0" class="input-field">
+                            <span class="input-unit">bandejas</span>
+                        </div>
+                        <div class="weight-preview">Peso calculado: <span id="preview-mass-115">0.000</span> kg</div>
+                    </div>
+
+                    <!-- Mass 14 -->
+                    <div class="input-group">
+                        <label for="input-mass-14">
+                            <span class="mass-name">Massa 14"</span>
+                            <span class="mass-meta">Tradicional • 5 bandejas/batch</span>
+                        </label>
+                        <div class="input-control">
+                            <input type="number" id="input-mass-14" min="0" value="0" placeholder="0" class="input-field">
+                            <span class="input-unit">bandejas</span>
+                        </div>
+                        <div class="weight-preview">Peso calculado: <span id="preview-mass-14">0.000</span> kg</div>
+                    </div>
+
+                    <!-- Mass Pan -->
+                    <div class="input-group group-pan">
+                        <label for="input-mass-pan">
+                            <span class="mass-name">Massa Pan</span>
+                            <span class="mass-meta">Pan Especial • 5 bandejas/batch</span>
+                        </label>
+                        <div class="input-control">
+                            <input type="number" id="input-mass-pan" min="0" value="0" placeholder="0" class="input-field">
+                            <span class="input-unit">bandejas</span>
+                        </div>
+                        <div class="weight-preview">Peso calculado: <span id="preview-mass-pan">0.000</span> kg</div>
+                    </div>
+                </form>
+
+                <div class="panel-footer-actions">
+                    <button type="button" id="btn-reset" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M16 3h5v5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 21H3v-5"/></svg>
+                        Limpar Dados
+                    </button>
+                </div>
+            </section>
+
+            <!-- Right Panel: Outputs -->
+            <section class="card-panel panel-outputs">
+                <div class="panel-header">
+                    <h2>Resumo de Produção</h2>
+                    <p>Quantidades consolidadas de ingredientes para compra e produção.</p>
+                </div>
+
+                <div class="summary-total-card">
+                    <div class="summary-total-label">Peso Total de Massa</div>
+                    <div class="summary-total-val"><span id="total-dough-weight">0.00</span> <span class="unit">kg</span></div>
+                </div>
+
+                <div class="batches-card">
+                    <div class="batch-type">
+                        <span class="batch-label">Lotes Tradicional</span>
+                        <span class="batch-value"><span id="batches-trad">0.00</span> <span class="unit">batch(es)</span></span>
+                    </div>
+                    <div class="batch-type">
+                        <span class="batch-label">Lotes Pan</span>
+                        <span class="batch-value"><span id="batches-pan">0.00</span> <span class="unit">batch(es)</span></span>
+                    </div>
+                </div>
+
+                <div class="ingredients-list">
+                    <!-- Farinha -->
+                    <div class="ingredient-item">
+                        <div class="ing-icon-name">
+
+                            <div>
+                                <div class="ing-name">Farinha de Trigo</div>
+                                <div class="ing-origin">Tradicional + Pan</div>
+                            </div>
+                        </div>
+                        <div class="ing-value"><span id="total-flour">0.000</span> <span class="unit">kg</span></div>
+                    </div>
+
+                    <!-- Água -->
+                    <div class="ingredient-item">
+                        <div class="ing-icon-name">
+
+                            <div>
+                                <div class="ing-name">Água</div>
+                                <div class="ing-origin">Tradicional + Pan</div>
+                            </div>
+                        </div>
+                        <div class="ing-value"><span id="total-water">0.000</span> <span class="unit">kg</span></div>
+                    </div>
+
+                    <!-- Óleo -->
+                    <div class="ingredient-item">
+                        <div class="ing-icon-name">
+
+                            <div>
+                                <div class="ing-name">Óleo Vegetal</div>
+                                <div class="ing-origin">Tradicional + Pan</div>
+                            </div>
+                        </div>
+                        <div class="ing-value"><span id="total-oil">0.000</span> <span class="unit">kg</span></div>
+                    </div>
+
+                    <!-- Pré-mix -->
+                    <div class="ingredient-item">
+                        <div class="ing-icon-name">
+
+                            <div>
+                                <div class="ing-name">Pré-mix</div>
+                                <div class="ing-origin">Tradicional + Pan</div>
+                            </div>
+                        </div>
+                        <div class="ing-value"><span id="total-premix">0.000</span> <span class="unit">kg</span></div>
+                    </div>
+
+                    <!-- Fermento -->
+                    <div class="ingredient-item">
+                        <div class="ing-icon-name">
+
+                            <div>
+                                <div class="ing-name">Fermento</div>
+                                <div class="ing-origin">Tradicional + Pan</div>
+                            </div>
+                        </div>
+                        <div class="ing-value"><span id="total-yeast">0.000</span> <span class="unit">kg</span></div>
+                    </div>
+
+                    <!-- Óleo de Palma -->
+                    <div class="ingredient-item highlight-pan">
+                        <div class="ing-icon-name">
+
+                            <div>
+                                <div class="ing-name">Óleo de Palma</div>
+                                <div class="ing-origin">Apenas Massa Pan</div>
+                            </div>
+                        </div>
+                        <div class="ing-value"><span id="total-palmoil">0.000</span> <span class="unit">kg</span></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>Desenvolvido com foco em precisão e eficiência industrial.</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
