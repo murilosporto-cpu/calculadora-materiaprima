@@ -126,9 +126,29 @@ function calculateIngredients() {
     const totalYeast   = tradYeast  + panYeast;
     const totalPalmOil = panPalm;
 
-    // Batches: arredondado PARA CIMA (Math.ceil) — produção real
-    const batchesTradVal = pesoTrad > 0 ? Math.ceil(pesoTrad / BATCH_TRADICIONAL.total) : 0;
-    const batchesPanVal  = pesoPan  > 0 ? Math.ceil(pesoPan  / BATCH_PAN.total)         : 0;
+    // Batches: com sugestão de meia batida quando a fração não completa um inteiro
+    const rawTrad = pesoTrad > 0 ? pesoTrad / BATCH_TRADICIONAL.total : 0;
+    const rawPan  = pesoPan  > 0 ? pesoPan  / BATCH_PAN.total         : 0;
+
+    function formatBatida(raw) {
+        if (raw === 0) return { display: '0', hint: 'batida(s) necessária(s)' };
+        const intPart  = Math.floor(raw);
+        const fracPart = raw - intPart;
+
+        // Exato — sem fração
+        if (fracPart < 0.01) {
+            return { display: String(intPart), hint: 'batida(s) necessária(s)' };
+        }
+        // Fração ≤ 0.5 — sugerir meia batida
+        if (fracPart <= 0.5) {
+            return { display: intPart + ' e meia', hint: '💡 sugestão: meia batida' };
+        }
+        // Fração > 0.5 — arredondar para cima
+        return { display: String(intPart + 1), hint: 'batida(s) necessária(s)' };
+    }
+
+    const tradResult = formatBatida(rawTrad);
+    const panResult  = formatBatida(rawPan);
 
     // ── Atualizar DOM ──
     outputs.totalDough.textContent  = pesoTotal.toFixed(2);
@@ -138,8 +158,14 @@ function calculateIngredients() {
     outputs.premix.textContent      = totalPremix.toFixed(3);
     outputs.yeast.textContent       = totalYeast.toFixed(3);
     outputs.palmoil.textContent     = totalPalmOil.toFixed(3);
-    outputs.batchesTrad.textContent = batchesTradVal;
-    outputs.batchesPan.textContent  = batchesPanVal;
+    outputs.batchesTrad.textContent = tradResult.display;
+    outputs.batchesPan.textContent  = panResult.display;
+
+    // Atualizar hint text
+    const hintTrad = document.getElementById('batches-trad-hint');
+    const hintPan  = document.getElementById('batches-pan-hint');
+    if (hintTrad) hintTrad.textContent = tradResult.hint;
+    if (hintPan)  hintPan.textContent  = panResult.hint;
 
     // ── Atualizar barras de progresso ──
     const maxIngredient = Math.max(totalFlour, totalWater, totalOil, totalPremix, totalYeast, totalPalmOil, 0.001);
