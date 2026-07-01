@@ -158,16 +158,11 @@ body {
 
 /* Domino's tile SVG logo */
 .dominos-logo {
-    width: 52px;
     height: 52px;
+    width: auto;
     flex-shrink: 0;
-    filter: drop-shadow(0 4px 12px rgba(227,24,55,0.4));
-    animation: logoPulse 4s ease-in-out infinite;
-}
-
-@keyframes logoPulse {
-    0%, 100% { filter: drop-shadow(0 4px 12px rgba(227,24,55,0.4)); }
-    50%       { filter: drop-shadow(0 6px 20px rgba(227,24,55,0.7)); }
+    object-fit: contain;
+    filter: drop-shadow(0 4px 12px rgba(227,24,55,0.35));
 }
 
 .brand-text-area { display: flex; flex-direction: column; gap: 2px; }
