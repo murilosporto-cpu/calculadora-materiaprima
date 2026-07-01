@@ -34,66 +34,7 @@ const MASSA_SPECS = {
     'pan': { tipo: 'pan',         pesoPorBandeja: 17.48 / 5  }   // 3.496 kg
 };
 
-// ─── 2. CHART ────────────────────────────────────────────────────────────────
-
-let ingredientsChart = null;
-
-function initChart() {
-    const ctx = document.getElementById('ingredients-chart').getContext('2d');
-    ingredientsChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Farinha', 'Água', 'Óleo', 'Pré-mix', 'Fermento', 'Óleo de Palma'],
-            datasets: [{
-                data: [0, 0, 0, 0, 0, 0],
-                backgroundColor: [
-                    '#f59e0b',
-                    '#06b6d4',
-                    '#6366f1',
-                    '#a855f7',
-                    '#ec4899',
-                    '#10d9a0'
-                ],
-                borderColor: 'rgba(13, 17, 30, 0.9)',
-                borderWidth: 3,
-                hoverBorderColor: 'rgba(255,255,255,0.2)',
-                hoverOffset: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: { duration: 600, easing: 'easeInOutQuart' },
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: {
-                        color: '#8896b0',
-                        font: { family: 'Inter', size: 10, weight: '600' },
-                        boxWidth: 8,
-                        padding: 10
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(8, 11, 22, 0.95)',
-                    titleColor: '#f0f4ff',
-                    bodyColor: '#8896b0',
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    borderWidth: 1,
-                    padding: 10,
-                    callbacks: {
-                        label: function(context) {
-                            const val = context.raw;
-                            if (val === 0) return ` ${context.label}: —`;
-                            return ` ${context.label}: ${val.toFixed(3)} kg`;
-                        }
-                    }
-                }
-            },
-            cutout: '72%'
-        }
-    });
-}
+// ─── 2. CHART (removido) ─────────────────────────────────────────────────────
 
 // ─── 3. DOM REFERENCES ───────────────────────────────────────────────────────
 
@@ -200,14 +141,6 @@ function calculateIngredients() {
     outputs.batchesTrad.textContent = batchesTradVal;
     outputs.batchesPan.textContent  = batchesPanVal;
 
-    // ── Atualizar Chart ──
-    if (ingredientsChart) {
-        ingredientsChart.data.datasets[0].data = [
-            totalFlour, totalWater, totalOil, totalPremix, totalYeast, totalPalmOil
-        ];
-        ingredientsChart.update();
-    }
-
     // ── Atualizar barras de progresso ──
     const maxIngredient = Math.max(totalFlour, totalWater, totalOil, totalPremix, totalYeast, totalPalmOil, 0.001);
 
@@ -257,6 +190,5 @@ btnReset.addEventListener('click', () => {
 // ─── 6. INIT ─────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
-    initChart();
     calculateIngredients();
 });
