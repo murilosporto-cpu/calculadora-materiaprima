@@ -141,7 +141,8 @@ function calculateIngredients() {
         }
         // Fração ≤ 0.5 — sugerir meia batida
         if (fracPart <= 0.5) {
-            return { display: intPart + ' e meia', hint: '💡 sugestão: meia batida' };
+            const decimalVal = intPart + 0.5;
+            return { display: String(decimalVal).replace('.', ','), hint: '💡 sugestão: meia batida' };
         }
         // Fração > 0.5 — arredondar para cima
         return { display: String(intPart + 1), hint: 'batida(s) necessária(s)' };
