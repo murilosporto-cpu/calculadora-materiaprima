@@ -1,203 +1,262 @@
 /**
- * Domino's Pizza - Calculadora de Matéria-Prima
- * Lógica do aplicativo e cálculo de insumos de produção.
+ * Domino's Pizza - Calculadora de Matéria-Prima v2.0
+ * Lógica de cálculo de insumos de produção com barras de progresso animadas.
  */
 
-// --- 1. CONFIGURAÇÕES DAS FICHAS TÉCNICAS E RENDIMENTOS ---
+// ─── 1. FICHAS TÉCNICAS POR BATCH ───────────────────────────────────────────
 
-// Fichas Técnicas por Batch (Valores em kg)
 const BATCH_TRADICIONAL = {
-    total: 16.16,
-    farinha: 10.00,
-    agua: 5.40,
-    oleo: 0.38,
-    premix: 0.34,
-    fermento: 0.04,
-    oleoPalma: 0.00
+    total:     16.16,
+    farinha:   10.00,
+    agua:       5.40,
+    oleo:       0.38,
+    premix:     0.34,
+    fermento:   0.04,
+    oleoPalma:  0.00
 };
 
 const BATCH_PAN = {
-    total: 17.48,
-    farinha: 10.00,
-    agua: 5.60,
-    oleo: 0.20,
-    premix: 0.34,
-    fermento: 0.04,
-    oleoPalma: 1.30
+    total:     17.48,
+    farinha:   10.00,
+    agua:       5.60,
+    oleo:       0.20,
+    premix:     0.34,
+    fermento:   0.04,
+    oleoPalma:  1.30
 };
 
-// Rendimentos e Pesos por Bandeja (Valores em kg)
+// Rendimento por bandeja (kg / bandeja)
 const MASSA_SPECS = {
-    '7': {
-        tipo: 'tradicional',
-        pesoPorBandeja: 16.16 / 10 // 1.616 kg
-    },
-    '85': {
-        tipo: 'tradicional',
-        pesoPorBandeja: 16.16 / 6 // ~2.693333 kg (Usamos divisão exata para precisão matemática total)
-    },
-    '115': {
-        tipo: 'tradicional',
-        pesoPorBandeja: 16.16 / 5 // 3.232 kg
-    },
-    '14': {
-        tipo: 'tradicional',
-        pesoPorBandeja: 16.16 / 5 // 3.232 kg
-    },
-    'pan': {
-        tipo: 'pan',
-        pesoPorBandeja: 17.48 / 5 // 3.496 kg
-    }
+    '7':   { tipo: 'tradicional', pesoPorBandeja: 16.16 / 10 },  // 1.616 kg
+    '85':  { tipo: 'tradicional', pesoPorBandeja: 16.16 / 6  },  // ~2.693 kg
+    '115': { tipo: 'tradicional', pesoPorBandeja: 16.16 / 5  },  // 3.232 kg
+    '14':  { tipo: 'tradicional', pesoPorBandeja: 16.16 / 5  },  // 3.232 kg
+    'pan': { tipo: 'pan',         pesoPorBandeja: 17.48 / 5  }   // 3.496 kg
 };
 
-// --- 2. ELEMENTOS DO DOM ---
+// ─── 2. CHART ────────────────────────────────────────────────────────────────
+
+let ingredientsChart = null;
+
+function initChart() {
+    const ctx = document.getElementById('ingredients-chart').getContext('2d');
+    ingredientsChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Farinha', 'Água', 'Óleo', 'Pré-mix', 'Fermento', 'Óleo de Palma'],
+            datasets: [{
+                data: [0, 0, 0, 0, 0, 0],
+                backgroundColor: [
+                    '#f59e0b',
+                    '#06b6d4',
+                    '#6366f1',
+                    '#a855f7',
+                    '#ec4899',
+                    '#10d9a0'
+                ],
+                borderColor: 'rgba(13, 17, 30, 0.9)',
+                borderWidth: 3,
+                hoverBorderColor: 'rgba(255,255,255,0.2)',
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 600, easing: 'easeInOutQuart' },
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        color: '#8896b0',
+                        font: { family: 'Inter', size: 10, weight: '600' },
+                        boxWidth: 8,
+                        padding: 10
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(8, 11, 22, 0.95)',
+                    titleColor: '#f0f4ff',
+                    bodyColor: '#8896b0',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    padding: 10,
+                    callbacks: {
+                        label: function(context) {
+                            const val = context.raw;
+                            if (val === 0) return ` ${context.label}: —`;
+                            return ` ${context.label}: ${val.toFixed(3)} kg`;
+                        }
+                    }
+                }
+            },
+            cutout: '72%'
+        }
+    });
+}
+
+// ─── 3. DOM REFERENCES ───────────────────────────────────────────────────────
 
 const inputs = {
-    '7': document.getElementById('input-mass-7'),
-    '85': document.getElementById('input-mass-85'),
+    '7':   document.getElementById('input-mass-7'),
+    '85':  document.getElementById('input-mass-85'),
     '115': document.getElementById('input-mass-115'),
-    '14': document.getElementById('input-mass-14'),
+    '14':  document.getElementById('input-mass-14'),
     'pan': document.getElementById('input-mass-pan')
 };
 
 const previews = {
-    '7': document.getElementById('preview-mass-7'),
-    '85': document.getElementById('preview-mass-85'),
+    '7':   document.getElementById('preview-mass-7'),
+    '85':  document.getElementById('preview-mass-85'),
     '115': document.getElementById('preview-mass-115'),
-    '14': document.getElementById('preview-mass-14'),
+    '14':  document.getElementById('preview-mass-14'),
     'pan': document.getElementById('preview-mass-pan')
 };
 
 const outputs = {
-    totalDough: document.getElementById('total-dough-weight'),
-    flour: document.getElementById('total-flour'),
-    water: document.getElementById('total-water'),
-    oil: document.getElementById('total-oil'),
-    premix: document.getElementById('total-premix'),
-    yeast: document.getElementById('total-yeast'),
-    palmoil: document.getElementById('total-palmoil'),
+    totalDough:  document.getElementById('total-dough-weight'),
+    flour:       document.getElementById('total-flour'),
+    water:       document.getElementById('total-water'),
+    oil:         document.getElementById('total-oil'),
+    premix:      document.getElementById('total-premix'),
+    yeast:       document.getElementById('total-yeast'),
+    palmoil:     document.getElementById('total-palmoil'),
     batchesTrad: document.getElementById('batches-trad'),
-    batchesPan: document.getElementById('batches-pan')
+    batchesPan:  document.getElementById('batches-pan')
+};
+
+const bars = {
+    flour:   document.getElementById('bar-flour'),
+    water:   document.getElementById('bar-water'),
+    oil:     document.getElementById('bar-oil'),
+    premix:  document.getElementById('bar-premix'),
+    yeast:   document.getElementById('bar-yeast'),
+    palmoil: document.getElementById('bar-palmoil')
 };
 
 const btnReset = document.getElementById('btn-reset');
 
-// --- 3. LÓGICA DE CÁLCULO ---
+// ─── 4. CÁLCULO PRINCIPAL ────────────────────────────────────────────────────
 
 function calculateIngredients() {
-    // Quantidade de bandejas inseridas pelo usuário
-    const quantities = {
-        '7': Math.max(0, parseInt(inputs['7'].value) || 0),
-        '85': Math.max(0, parseInt(inputs['85'].value) || 0),
-        '115': Math.max(0, parseInt(inputs['115'].value) || 0),
-        '14': Math.max(0, parseInt(inputs['14'].value) || 0),
-        'pan': Math.max(0, parseInt(inputs['pan'].value) || 0)
-    };
+    // Ler quantidades de bandejas
+    const qty = {};
+    for (const key in inputs) {
+        qty[key] = Math.max(0, parseInt(inputs[key].value) || 0);
+    }
 
-    // 1. Calcular o peso total de cada tipo de massa com base nas bandejas
-    let pesoTotalTradicional = 0;
-    let pesoTotalPan = 0;
+    // Calcular peso por tipo
+    let pesoTrad = 0;
+    let pesoPan  = 0;
 
     for (const key in MASSA_SPECS) {
-        const spec = MASSA_SPECS[key];
-        const quant = quantities[key];
-        const pesoMassa = quant * spec.pesoPorBandeja;
+        const spec  = MASSA_SPECS[key];
+        const peso  = qty[key] * spec.pesoPorBandeja;
 
-        // Atualizar o preview de peso individual no DOM
-        if (previews[key]) {
-            previews[key].textContent = pesoMassa.toFixed(3);
-        }
+        // Atualizar preview individual
+        if (previews[key]) previews[key].textContent = peso.toFixed(3);
 
-        if (spec.tipo === 'tradicional') {
-            pesoTotalTradicional += pesoMassa;
-        } else if (spec.tipo === 'pan') {
-            pesoTotalPan += pesoMassa;
-        }
+        if (spec.tipo === 'tradicional') pesoTrad += peso;
+        else                             pesoPan  += peso;
     }
 
-    // Peso total geral de todas as massas
-    const pesoTotalGeral = pesoTotalTradicional + pesoTotalPan;
+    const pesoTotal = pesoTrad + pesoPan;
 
-    // 2. Calcular a proporção de cada ingrediente
-    // Ingredientes = (Peso Total da Massa do Tipo) * (Ingrediente no Batch / Peso Total do Batch)
-    
-    // Tradicional
-    const tradFlour = pesoTotalTradicional * (BATCH_TRADICIONAL.farinha / BATCH_TRADICIONAL.total);
-    const tradWater = pesoTotalTradicional * (BATCH_TRADICIONAL.agua / BATCH_TRADICIONAL.total);
-    const tradOil = pesoTotalTradicional * (BATCH_TRADICIONAL.oleo / BATCH_TRADICIONAL.total);
-    const tradPremix = pesoTotalTradicional * (BATCH_TRADICIONAL.premix / BATCH_TRADICIONAL.total);
-    const tradYeast = pesoTotalTradicional * (BATCH_TRADICIONAL.fermento / BATCH_TRADICIONAL.total);
+    // Ingredientes Tradicional
+    const tradFlour  = pesoTrad * (BATCH_TRADICIONAL.farinha  / BATCH_TRADICIONAL.total);
+    const tradWater  = pesoTrad * (BATCH_TRADICIONAL.agua     / BATCH_TRADICIONAL.total);
+    const tradOil    = pesoTrad * (BATCH_TRADICIONAL.oleo     / BATCH_TRADICIONAL.total);
+    const tradPremix = pesoTrad * (BATCH_TRADICIONAL.premix   / BATCH_TRADICIONAL.total);
+    const tradYeast  = pesoTrad * (BATCH_TRADICIONAL.fermento / BATCH_TRADICIONAL.total);
 
-    // Pan
-    const panFlour = pesoTotalPan * (BATCH_PAN.farinha / BATCH_PAN.total);
-    const panWater = pesoTotalPan * (BATCH_PAN.agua / BATCH_PAN.total);
-    const panOil = pesoTotalPan * (BATCH_PAN.oleo / BATCH_PAN.total);
-    const panPremix = pesoTotalPan * (BATCH_PAN.premix / BATCH_PAN.total);
-    const panYeast = pesoTotalPan * (BATCH_PAN.fermento / BATCH_PAN.total);
-    const panPalm = pesoTotalPan * (BATCH_PAN.oleoPalma / BATCH_PAN.total);
+    // Ingredientes Pan
+    const panFlour   = pesoPan * (BATCH_PAN.farinha    / BATCH_PAN.total);
+    const panWater   = pesoPan * (BATCH_PAN.agua       / BATCH_PAN.total);
+    const panOil     = pesoPan * (BATCH_PAN.oleo       / BATCH_PAN.total);
+    const panPremix  = pesoPan * (BATCH_PAN.premix     / BATCH_PAN.total);
+    const panYeast   = pesoPan * (BATCH_PAN.fermento   / BATCH_PAN.total);
+    const panPalm    = pesoPan * (BATCH_PAN.oleoPalma  / BATCH_PAN.total);
 
-    // Consolidando os valores
-    const totalFlour = tradFlour + panFlour;
-    const totalWater = tradWater + panWater;
-    const totalOil = tradOil + panOil;
-    const totalPremix = tradPremix + panPremix;
-    const totalYeast = tradYeast + panYeast;
-    const totalPalmOil = panPalm; // Apenas Pan
+    // Totais consolidados
+    const totalFlour   = tradFlour  + panFlour;
+    const totalWater   = tradWater  + panWater;
+    const totalOil     = tradOil    + panOil;
+    const totalPremix  = tradPremix + panPremix;
+    const totalYeast   = tradYeast  + panYeast;
+    const totalPalmOil = panPalm;
 
-    // 3. Calcular a quantidade de lotes (batches) necessários
-    const batchesTradVal = pesoTotalTradicional / BATCH_TRADICIONAL.total;
-    const batchesPanVal = pesoTotalPan / BATCH_PAN.total;
+    // Batches: arredondado PARA CIMA (Math.ceil) — produção real
+    const batchesTradVal = pesoTrad > 0 ? Math.ceil(pesoTrad / BATCH_TRADICIONAL.total) : 0;
+    const batchesPanVal  = pesoPan  > 0 ? Math.ceil(pesoPan  / BATCH_PAN.total)         : 0;
 
-    // 4. Atualizar o DOM com os valores consolidados
-    outputs.totalDough.textContent = pesoTotalGeral.toFixed(2);
-    outputs.flour.textContent = totalFlour.toFixed(3);
-    outputs.water.textContent = totalWater.toFixed(3);
-    outputs.oil.textContent = totalOil.toFixed(3);
-    outputs.premix.textContent = totalPremix.toFixed(3);
-    outputs.yeast.textContent = totalYeast.toFixed(3);
-    outputs.palmoil.textContent = totalPalmOil.toFixed(3);
-    outputs.batchesTrad.textContent = batchesTradVal.toFixed(2);
-    outputs.batchesPan.textContent = batchesPanVal.toFixed(2);
+    // ── Atualizar DOM ──
+    outputs.totalDough.textContent  = pesoTotal.toFixed(2);
+    outputs.flour.textContent       = totalFlour.toFixed(3);
+    outputs.water.textContent       = totalWater.toFixed(3);
+    outputs.oil.textContent         = totalOil.toFixed(3);
+    outputs.premix.textContent      = totalPremix.toFixed(3);
+    outputs.yeast.textContent       = totalYeast.toFixed(3);
+    outputs.palmoil.textContent     = totalPalmOil.toFixed(3);
+    outputs.batchesTrad.textContent = batchesTradVal;
+    outputs.batchesPan.textContent  = batchesPanVal;
+
+    // ── Atualizar Chart ──
+    if (ingredientsChart) {
+        ingredientsChart.data.datasets[0].data = [
+            totalFlour, totalWater, totalOil, totalPremix, totalYeast, totalPalmOil
+        ];
+        ingredientsChart.update();
+    }
+
+    // ── Atualizar barras de progresso ──
+    const maxIngredient = Math.max(totalFlour, totalWater, totalOil, totalPremix, totalYeast, totalPalmOil, 0.001);
+
+    function setBar(barEl, value) {
+        if (!barEl) return;
+        const pct = Math.max(0, Math.min(100, (value / maxIngredient) * 100));
+        barEl.style.width = pct + '%';
+    }
+
+    setBar(bars.flour,   totalFlour);
+    setBar(bars.water,   totalWater);
+    setBar(bars.oil,     totalOil);
+    setBar(bars.premix,  totalPremix);
+    setBar(bars.yeast,   totalYeast);
+    setBar(bars.palmoil, totalPalmOil);
 }
 
-// --- 4. CONFIGURAÇÃO DOS EVENTOS ---
+// ─── 5. EVENT LISTENERS ──────────────────────────────────────────────────────
 
-// Adicionar listener de input em todos os campos numéricos
 for (const key in inputs) {
-    if (inputs[key]) {
-        inputs[key].addEventListener('input', () => {
-            // Impedir valores negativos diretamente no tratamento de eventos
-            if (parseInt(inputs[key].value) < 0) {
-                inputs[key].value = 0;
-            }
+    if (!inputs[key]) continue;
+
+    inputs[key].addEventListener('input', () => {
+        if (parseInt(inputs[key].value) < 0) inputs[key].value = 0;
+        calculateIngredients();
+    });
+
+    inputs[key].addEventListener('focus', function () {
+        if (this.value === '0') this.value = '';
+    });
+
+    inputs[key].addEventListener('blur', function () {
+        if (this.value.trim() === '') {
+            this.value = '0';
             calculateIngredients();
-        });
-        
-        // Tratar o foco e comportamento amigável
-        inputs[key].addEventListener('focus', function() {
-            if (this.value === '0') {
-                this.value = '';
-            }
-        });
-        
-        inputs[key].addEventListener('blur', function() {
-            if (this.value.trim() === '') {
-                this.value = '0';
-                calculateIngredients();
-            }
-        });
-    }
+        }
+    });
 }
 
-// Resetar o formulário
 btnReset.addEventListener('click', () => {
     for (const key in inputs) {
-        if (inputs[key]) {
-            inputs[key].value = '0';
-        }
+        if (inputs[key]) inputs[key].value = '0';
     }
     calculateIngredients();
 });
 
-// Executar cálculo inicial ao carregar a página
-document.addEventListener('DOMContentLoaded', calculateIngredients);
+// ─── 6. INIT ─────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+    initChart();
+    calculateIngredients();
+});

@@ -4,216 +4,326 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Domino's Pizza - Calculadora de Produção</title>
-    <meta name="description" content="Calculadora profissional de insumos para produção de massas de pizza com base em fichas técnicas e rendimentos por bandeja.">
-    <!-- Google Fonts - Inter -->
+    <meta name="description" content="Calculadora profissional de insumos para produção de massas Domino's Pizza com base em fichas técnicas e rendimentos por bandeja.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Background decorative glows -->
-        <div class="glow glow-1"></div>
-        <div class="glow glow-2"></div>
 
+    <!-- Animated Background Scene -->
+    <div class="bg-scene">
+        <div class="bg-grid"></div>
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- ===== HEADER ===== -->
         <header class="app-header">
             <div class="logo-area">
+                <!-- Domino's Tile SVG Logo -->
+                <svg class="dominos-logo" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="76" height="76" rx="12" fill="#1a1a2e" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    <!-- Red half -->
+                    <rect x="2" y="2" width="76" height="38" rx="12" fill="#E31837"/>
+                    <rect x="2" y="28" width="76" height="12" fill="#E31837"/>
+                    <!-- Blue half -->
+                    <rect x="2" y="40" width="76" height="38" rx="0" fill="#006491"/>
+                    <rect x="2" y="66" width="76" height="14" rx="12" fill="#006491"/>
+                    <!-- Dividing line -->
+                    <rect x="2" y="38" width="76" height="4" fill="white" opacity="0.15"/>
+                    <!-- Red dots (top 2) -->
+                    <circle cx="27" cy="22" r="6" fill="white" opacity="0.9"/>
+                    <circle cx="53" cy="22" r="6" fill="white" opacity="0.9"/>
+                    <!-- Blue dots (bottom 5) -->
+                    <circle cx="18" cy="58" r="5" fill="white" opacity="0.9"/>
+                    <circle cx="40" cy="52" r="5" fill="white" opacity="0.9"/>
+                    <circle cx="62" cy="58" r="5" fill="white" opacity="0.9"/>
+                    <circle cx="27" cy="67" r="5" fill="white" opacity="0.9"/>
+                    <circle cx="53" cy="67" r="5" fill="white" opacity="0.9"/>
+                </svg>
+
                 <div class="brand-text-area">
-                    <h1 class="brand-title">Domino's Pizza</h1>
+                    <h1 class="brand-title"><span>Domino's</span> Pizza</h1>
                     <p class="subtitle">Calculadora de Matéria-Prima</p>
                 </div>
             </div>
-            <div class="badge-system">
-                <span class="badge">Arquiteto de Produção v1.0</span>
+
+            <div class="header-right">
+                <span class="badge">Arquiteto de Produção v2.0</span>
             </div>
         </header>
 
+        <!-- ===== MAIN ===== -->
         <main class="app-main">
-            <!-- Left Panel: Inputs -->
+
+            <!-- ── Left Panel: Inputs ── -->
             <section class="card-panel panel-inputs">
+
                 <div class="panel-header">
-                    <h2>Planejamento de Produção</h2>
-                    <p>Insira a quantidade de bandejas planejada para cada tipo de massa.</p>
+                    <div class="panel-header-row">
+                        <h2 class="panel-title">Planejamento de Produção</h2>
+                    </div>
+                    <p class="panel-desc">Insira a quantidade de bandejas planejada para cada tipo de massa.</p>
                 </div>
-                
+
                 <form id="production-form" class="form-grid" onsubmit="event.preventDefault();">
+
+                    <!-- Separator: Tradicional -->
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:-0.25rem">
+                        <span class="section-chip chip-trad">🍕 Massa Tradicional</span>
+                    </div>
+
                     <!-- Mass 7 -->
-                    <div class="input-group">
-                        <label for="input-mass-7">
+                    <div class="input-group" id="group-7">
+                        <div class="input-label-row">
                             <span class="mass-name">Massa 7"</span>
-                            <span class="mass-meta">Tradicional • 10 bandejas/batch</span>
-                        </label>
-                        <div class="input-control">
-                            <input type="number" id="input-mass-7" min="0" value="0" placeholder="0" class="input-field">
-                            <span class="input-unit">bandejas</span>
+                            <span class="mass-meta">10 bandejas / batch</span>
                         </div>
-                        <div class="weight-preview">Peso calculado: <span id="preview-mass-7">0.000</span> kg</div>
+                        <div class="input-row">
+                            <div class="input-field-wrap">
+                                <input type="number" id="input-mass-7" min="0" value="0" class="input-field" autocomplete="off">
+                                <span class="input-unit">bandejas</span>
+                            </div>
+                            <div class="weight-preview-pill" id="preview-wrap-7">
+                                <span id="preview-mass-7">0.000</span> kg
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Mass 8.5 -->
-                    <div class="input-group">
-                        <label for="input-mass-85">
+                    <div class="input-group" id="group-85">
+                        <div class="input-label-row">
                             <span class="mass-name">Massa 8.5"</span>
-                            <span class="mass-meta">Tradicional • 6 bandejas/batch</span>
-                        </label>
-                        <div class="input-control">
-                            <input type="number" id="input-mass-85" min="0" value="0" placeholder="0" class="input-field">
-                            <span class="input-unit">bandejas</span>
+                            <span class="mass-meta">6 bandejas / batch</span>
                         </div>
-                        <div class="weight-preview">Peso calculado: <span id="preview-mass-85">0.000</span> kg</div>
+                        <div class="input-row">
+                            <div class="input-field-wrap">
+                                <input type="number" id="input-mass-85" min="0" value="0" class="input-field" autocomplete="off">
+                                <span class="input-unit">bandejas</span>
+                            </div>
+                            <div class="weight-preview-pill" id="preview-wrap-85">
+                                <span id="preview-mass-85">0.000</span> kg
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Mass 11.5 -->
-                    <div class="input-group">
-                        <label for="input-mass-115">
+                    <div class="input-group" id="group-115">
+                        <div class="input-label-row">
                             <span class="mass-name">Massa 11.5"</span>
-                            <span class="mass-meta">Tradicional • 5 bandejas/batch</span>
-                        </label>
-                        <div class="input-control">
-                            <input type="number" id="input-mass-115" min="0" value="0" placeholder="0" class="input-field">
-                            <span class="input-unit">bandejas</span>
+                            <span class="mass-meta">5 bandejas / batch</span>
                         </div>
-                        <div class="weight-preview">Peso calculado: <span id="preview-mass-115">0.000</span> kg</div>
+                        <div class="input-row">
+                            <div class="input-field-wrap">
+                                <input type="number" id="input-mass-115" min="0" value="0" class="input-field" autocomplete="off">
+                                <span class="input-unit">bandejas</span>
+                            </div>
+                            <div class="weight-preview-pill" id="preview-wrap-115">
+                                <span id="preview-mass-115">0.000</span> kg
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Mass 14 -->
-                    <div class="input-group">
-                        <label for="input-mass-14">
+                    <div class="input-group" id="group-14">
+                        <div class="input-label-row">
                             <span class="mass-name">Massa 14"</span>
-                            <span class="mass-meta">Tradicional • 5 bandejas/batch</span>
-                        </label>
-                        <div class="input-control">
-                            <input type="number" id="input-mass-14" min="0" value="0" placeholder="0" class="input-field">
-                            <span class="input-unit">bandejas</span>
+                            <span class="mass-meta">5 bandejas / batch</span>
                         </div>
-                        <div class="weight-preview">Peso calculado: <span id="preview-mass-14">0.000</span> kg</div>
+                        <div class="input-row">
+                            <div class="input-field-wrap">
+                                <input type="number" id="input-mass-14" min="0" value="0" class="input-field" autocomplete="off">
+                                <span class="input-unit">bandejas</span>
+                            </div>
+                            <div class="weight-preview-pill" id="preview-wrap-14">
+                                <span id="preview-mass-14">0.000</span> kg
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Separator: Pan -->
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:-0.25rem;margin-top:0.25rem">
+                        <span class="section-chip chip-pan">🟩 Massa Pan</span>
                     </div>
 
                     <!-- Mass Pan -->
-                    <div class="input-group group-pan">
-                        <label for="input-mass-pan">
+                    <div class="input-group group-pan" id="group-pan">
+                        <div class="input-label-row">
                             <span class="mass-name">Massa Pan</span>
-                            <span class="mass-meta">Pan Especial • 5 bandejas/batch</span>
-                        </label>
-                        <div class="input-control">
-                            <input type="number" id="input-mass-pan" min="0" value="0" placeholder="0" class="input-field">
-                            <span class="input-unit">bandejas</span>
+                            <span class="mass-meta">5 bandejas / batch</span>
                         </div>
-                        <div class="weight-preview">Peso calculado: <span id="preview-mass-pan">0.000</span> kg</div>
+                        <div class="input-row">
+                            <div class="input-field-wrap">
+                                <input type="number" id="input-mass-pan" min="0" value="0" class="input-field" autocomplete="off">
+                                <span class="input-unit">bandejas</span>
+                            </div>
+                            <div class="weight-preview-pill" id="preview-wrap-pan">
+                                <span id="preview-mass-pan">0.000</span> kg
+                            </div>
+                        </div>
                     </div>
+
                 </form>
 
                 <div class="panel-footer-actions">
                     <button type="button" id="btn-reset" class="btn btn-secondary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M16 3h5v5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 21H3v-5"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M16 3h5v5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 21H3v-5"/></svg>
                         Limpar Dados
                     </button>
                 </div>
             </section>
 
-            <!-- Right Panel: Outputs -->
+            <!-- ── Right Panel: Outputs ── -->
             <section class="card-panel panel-outputs">
+
                 <div class="panel-header">
-                    <h2>Resumo de Produção</h2>
-                    <p>Quantidades consolidadas de ingredientes para compra e produção.</p>
+                    <div class="panel-header-row">
+                        <h2 class="panel-title">Resumo de Produção</h2>
+                    </div>
+                    <p class="panel-desc">Quantidades consolidadas de ingredientes para compra e produção.</p>
                 </div>
 
-                <div class="summary-total-card">
-                    <div class="summary-total-label">Peso Total de Massa</div>
-                    <div class="summary-total-val"><span id="total-dough-weight">0.00</span> <span class="unit">kg</span></div>
+                <!-- Total Hero Card -->
+                <div class="summary-hero">
+                    <div>
+                        <div class="summary-hero-label">Peso Total de Massa</div>
+                        <div class="summary-hero-val">
+                            <span id="total-dough-weight">0.00</span><span class="unit"> kg</span>
+                        </div>
+                    </div>
+                    <div class="summary-hero-icon">🍕</div>
                 </div>
 
-                <div class="batches-card">
-                    <div class="batch-type">
-                        <span class="batch-label">Lotes Tradicional</span>
-                        <span class="batch-value"><span id="batches-trad">0.00</span> <span class="unit">batch(es)</span></span>
+                <!-- Batches Grid -->
+                <div class="batches-grid">
+                    <div class="batch-card batch-card-trad">
+                        <div class="batch-card-label">Lotes Tradicional</div>
+                        <div class="batch-card-val"><span id="batches-trad">0</span></div>
+                        <div class="batch-card-unit">batch(es) necessários</div>
                     </div>
-                    <div class="batch-type">
-                        <span class="batch-label">Lotes Pan</span>
-                        <span class="batch-value"><span id="batches-pan">0.00</span> <span class="unit">batch(es)</span></span>
+                    <div class="batch-card batch-card-pan">
+                        <div class="batch-card-label">Lotes Pan</div>
+                        <div class="batch-card-val"><span id="batches-pan">0</span></div>
+                        <div class="batch-card-unit">batch(es) necessários</div>
                     </div>
+                </div>
+
+                <!-- Doughnut Chart -->
+                <div class="chart-container">
+                    <canvas id="ingredients-chart"></canvas>
+                </div>
+
+                <!-- Ingredients List -->
+                <div>
+                    <div class="ingredients-section-title">Detalhamento por Ingrediente</div>
                 </div>
 
                 <div class="ingredients-list">
+
                     <!-- Farinha -->
                     <div class="ingredient-item">
-                        <div class="ing-icon-name">
-
-                            <div>
-                                <div class="ing-name">Farinha de Trigo</div>
-                                <div class="ing-origin">Tradicional + Pan</div>
-                            </div>
+                        <div class="ing-dot" style="color:#f59e0b;background:#f59e0b;"></div>
+                        <div class="ing-info">
+                            <div class="ing-name">Farinha de Trigo</div>
+                            <div class="ing-origin">Tradicional + Pan</div>
                         </div>
-                        <div class="ing-value"><span id="total-flour">0.000</span> <span class="unit">kg</span></div>
+                        <div class="ing-bar-wrap">
+                            <div class="ing-bar" id="bar-flour" style="background:#f59e0b;width:0%"></div>
+                        </div>
+                        <div class="ing-val-wrap">
+                            <div class="ing-value"><span id="total-flour">0.000</span><span class="unit"> kg</span></div>
+                        </div>
                     </div>
 
                     <!-- Água -->
                     <div class="ingredient-item">
-                        <div class="ing-icon-name">
-
-                            <div>
-                                <div class="ing-name">Água</div>
-                                <div class="ing-origin">Tradicional + Pan</div>
-                            </div>
+                        <div class="ing-dot" style="color:#06b6d4;background:#06b6d4;"></div>
+                        <div class="ing-info">
+                            <div class="ing-name">Água</div>
+                            <div class="ing-origin">Tradicional + Pan</div>
                         </div>
-                        <div class="ing-value"><span id="total-water">0.000</span> <span class="unit">kg</span></div>
+                        <div class="ing-bar-wrap">
+                            <div class="ing-bar" id="bar-water" style="background:#06b6d4;width:0%"></div>
+                        </div>
+                        <div class="ing-val-wrap">
+                            <div class="ing-value"><span id="total-water">0.000</span><span class="unit"> kg</span></div>
+                        </div>
                     </div>
 
                     <!-- Óleo -->
                     <div class="ingredient-item">
-                        <div class="ing-icon-name">
-
-                            <div>
-                                <div class="ing-name">Óleo Vegetal</div>
-                                <div class="ing-origin">Tradicional + Pan</div>
-                            </div>
+                        <div class="ing-dot" style="color:#6366f1;background:#6366f1;"></div>
+                        <div class="ing-info">
+                            <div class="ing-name">Óleo Vegetal</div>
+                            <div class="ing-origin">Tradicional + Pan</div>
                         </div>
-                        <div class="ing-value"><span id="total-oil">0.000</span> <span class="unit">kg</span></div>
+                        <div class="ing-bar-wrap">
+                            <div class="ing-bar" id="bar-oil" style="background:#6366f1;width:0%"></div>
+                        </div>
+                        <div class="ing-val-wrap">
+                            <div class="ing-value"><span id="total-oil">0.000</span><span class="unit"> kg</span></div>
+                        </div>
                     </div>
 
                     <!-- Pré-mix -->
                     <div class="ingredient-item">
-                        <div class="ing-icon-name">
-
-                            <div>
-                                <div class="ing-name">Pré-mix</div>
-                                <div class="ing-origin">Tradicional + Pan</div>
-                            </div>
+                        <div class="ing-dot" style="color:#a855f7;background:#a855f7;"></div>
+                        <div class="ing-info">
+                            <div class="ing-name">Pré-mix</div>
+                            <div class="ing-origin">Tradicional + Pan</div>
                         </div>
-                        <div class="ing-value"><span id="total-premix">0.000</span> <span class="unit">kg</span></div>
+                        <div class="ing-bar-wrap">
+                            <div class="ing-bar" id="bar-premix" style="background:#a855f7;width:0%"></div>
+                        </div>
+                        <div class="ing-val-wrap">
+                            <div class="ing-value"><span id="total-premix">0.000</span><span class="unit"> kg</span></div>
+                        </div>
                     </div>
 
                     <!-- Fermento -->
                     <div class="ingredient-item">
-                        <div class="ing-icon-name">
-
-                            <div>
-                                <div class="ing-name">Fermento</div>
-                                <div class="ing-origin">Tradicional + Pan</div>
-                            </div>
+                        <div class="ing-dot" style="color:#ec4899;background:#ec4899;"></div>
+                        <div class="ing-info">
+                            <div class="ing-name">Fermento</div>
+                            <div class="ing-origin">Tradicional + Pan</div>
                         </div>
-                        <div class="ing-value"><span id="total-yeast">0.000</span> <span class="unit">kg</span></div>
+                        <div class="ing-bar-wrap">
+                            <div class="ing-bar" id="bar-yeast" style="background:#ec4899;width:0%"></div>
+                        </div>
+                        <div class="ing-val-wrap">
+                            <div class="ing-value"><span id="total-yeast">0.000</span><span class="unit"> kg</span></div>
+                        </div>
                     </div>
 
                     <!-- Óleo de Palma -->
                     <div class="ingredient-item highlight-pan">
-                        <div class="ing-icon-name">
-
-                            <div>
-                                <div class="ing-name">Óleo de Palma</div>
-                                <div class="ing-origin">Apenas Massa Pan</div>
-                            </div>
+                        <div class="ing-dot" style="color:#10d9a0;background:#10d9a0;"></div>
+                        <div class="ing-info">
+                            <div class="ing-name">Óleo de Palma</div>
+                            <div class="ing-origin">Apenas Massa Pan</div>
                         </div>
-                        <div class="ing-value"><span id="total-palmoil">0.000</span> <span class="unit">kg</span></div>
+                        <div class="ing-bar-wrap">
+                            <div class="ing-bar" id="bar-palmoil" style="background:#10d9a0;width:0%"></div>
+                        </div>
+                        <div class="ing-val-wrap">
+                            <div class="ing-value"><span id="total-palmoil">0.000</span><span class="unit"> kg</span></div>
+                        </div>
                     </div>
+
                 </div>
             </section>
         </main>
 
         <footer class="app-footer">
-            <p>Desenvolvido com foco em precisão e eficiência industrial.</p>
+            <p>Desenvolvido com foco em precisão e eficiência industrial &nbsp;·&nbsp; <strong>Domino's Pizza</strong> Gestão de Produção</p>
         </footer>
+
     </div>
 
     <script src="app.js"></script>
