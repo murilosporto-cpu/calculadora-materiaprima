@@ -749,12 +749,138 @@ body {
 .app-footer strong { color: var(--text-secondary); }
 
 /* ============================================================
-   RESPONSIVE
+   RESPONSIVE (Celular e Tablets)
    ============================================================ */
 @media (max-width: 600px) {
-    .app-header { padding: 1rem 1.25rem; }
-    .brand-title { font-size: 1.35rem; }
-    .card-panel { padding: 1.25rem; border-radius: 18px; }
-    .summary-hero-val { font-size: 2rem; }
-    .batches-grid { grid-template-columns: 1fr; }
+    body {
+        padding: 1rem 0.5rem 2rem;
+    }
+
+    .app-container {
+        gap: 1.25rem;
+    }
+
+    /* Header Mobile */
+    .app-header {
+        padding: 1.25rem 1.25rem;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.25rem;
+    }
+
+    .logo-area {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .brand-title {
+        font-size: 1.5rem;
+    }
+
+    .header-right {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch !important;
+    }
+
+    .header-right .btn {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .header-right .badge {
+        justify-content: center;
+        padding: 0.5rem;
+    }
+
+    /* Card Panels Mobile */
+    .card-panel {
+        padding: 1.25rem 1rem;
+        border-radius: 20px;
+        gap: 1.25rem;
+    }
+
+    .panel-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    /* Inputs Mobile */
+    .input-group {
+        padding: 0.85rem 0.95rem;
+        gap: 0.5rem;
+    }
+
+    .input-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.6rem;
+    }
+
+    .input-field-wrap {
+        width: 100%;
+    }
+
+    .input-field {
+        font-size: 1.15rem;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .weight-preview-pill {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    /* Outputs Mobile */
+    .summary-hero {
+        padding: 1.25rem;
+    }
+
+    .summary-hero-val {
+        font-size: 2.2rem;
+    }
+
+    .batches-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .batch-card {
+        padding: 1rem;
+    }
+
+    .batch-card-val {
+        font-size: 1.7rem;
+    }
+
+    /* Lista de Ingredientes Mobile */
+    .ingredient-item {
+        padding: 0.75rem 0.85rem;
+        gap: 0.75rem;
+    }
+
+    .ing-bar-wrap {
+        display: none; /* Esconde a barra de progresso em celulares muito pequenos para liberar espaço lateral */
+    }
+
+    .ing-val-wrap {
+        min-width: 80px;
+    }
+}
+
+/* Telas médias adicionais (ex: 601px a 800px) */
+@media (min-width: 601px) and (max-width: 800px) {
+    .app-header {
+        padding: 1.25rem;
+    }
+    .input-row {
+        flex-wrap: wrap;
+    }
 }
