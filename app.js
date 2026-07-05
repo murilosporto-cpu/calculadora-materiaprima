@@ -5,10 +5,11 @@
 
 // ─── 1. FICHAS TÉCNICAS POR BATCH ───────────────────────────────────────────
 
+// Ficha técnica — Batida de 10 kg (manual Comissariado 2026, pág. 16-17)
 const BATCH_TRADICIONAL = {
-    total:     16.16,
+    total:     16.26,   // 10 + 5,5 + 0,38 + 0,34 + 0,04
     farinha:   10.00,
-    agua:       5.40,
+    agua:       5.50,   // água total (5,3 massa + 0,2 fermento)
     oleo:       0.38,
     premix:     0.34,
     fermento:   0.04,
@@ -16,22 +17,22 @@ const BATCH_TRADICIONAL = {
 };
 
 const BATCH_PAN = {
-    total:     17.48,
+    total:     17.38,   // 10 + 5,5 + 0,20 + 0,34 + 0,04 + 1,30
     farinha:   10.00,
-    agua:       5.60,
+    agua:       5.50,   // água total (5,3 massa + 0,2 fermento)
     oleo:       0.20,
     premix:     0.34,
     fermento:   0.04,
     oleoPalma:  1.30
 };
 
-// Rendimento por bandeja (kg / bandeja)
+// Peso por bandeja (kg) — valores oficiais da ficha técnica (manual, pág. 10)
 const MASSA_SPECS = {
-    '7':   { tipo: 'tradicional', pesoPorBandeja: 16.16 / 10 },  // 1.616 kg
-    '85':  { tipo: 'tradicional', pesoPorBandeja: 16.16 / 6  },  // ~2.693 kg
-    '115': { tipo: 'tradicional', pesoPorBandeja: 16.16 / 5  },  // 3.232 kg
-    '14':  { tipo: 'tradicional', pesoPorBandeja: 16.16 / 5  },  // 3.232 kg
-    'pan': { tipo: 'pan',         pesoPorBandeja: 17.48 / 5  }   // 3.496 kg
+    '7':   { tipo: 'tradicional', pesoPorBandeja: 1.560 },  // Bandeja 7"
+    '85':  { tipo: 'tradicional', pesoPorBandeja: 2.920 },  // Bandeja 8,5" (tabela de rendimento)
+    '115': { tipo: 'tradicional', pesoPorBandeja: 2.920 },  // Bandeja 11,5"
+    '14':  { tipo: 'tradicional', pesoPorBandeja: 3.240 },  // Bandeja 14"
+    'pan': { tipo: 'pan',         pesoPorBandeja: 3.150 }   // Bandeja 11,5" Pan
 };
 
 // ─── 2. CHART (removido) ─────────────────────────────────────────────────────
