@@ -1237,6 +1237,46 @@ body {
 .prod-field input:focus { border-color: var(--dominos-blue); box-shadow: 0 0 0 3px var(--pan-glow); }
 .prod-report-actions { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
 
+/* Cartões de medição embutidos nos passos */
+.prod-item-wrap { display: flex; flex-direction: column; }
+.prod-meas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0.5rem 0 0.1rem 2.1rem;
+    padding: 0.7rem 0.85rem;
+    background: var(--pan-glow);
+    border: 1px dashed rgba(0,144,226,0.45);
+    border-radius: 10px;
+}
+.prod-meas-field { display: flex; flex-direction: column; gap: 0.3rem; }
+.prod-meas-field > label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--dominos-blue-dark);
+}
+.prod-meas-input { display: flex; align-items: center; gap: 0.4rem; }
+.prod-meas-input input {
+    width: 88px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-medium);
+    border-radius: 8px;
+    padding: 0.4rem 0.55rem;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 600;
+    outline: none;
+    -moz-appearance: textfield;
+}
+.prod-meas-input input::-webkit-outer-spin-button,
+.prod-meas-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.prod-meas-input input:focus { border-color: var(--dominos-blue); box-shadow: 0 0 0 3px var(--pan-glow); }
+.prod-meas-input span { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); }
+.prod-meas-field.is-empty input { border-color: rgba(225,6,0,0.45); background: rgba(225,6,0,0.04); }
+
 /* Mobile */
 @media (max-width: 600px) {
     .prod-overlay { padding: 0; }

@@ -17,9 +17,11 @@ const FASES_INICIAIS = [
             'Balança: ligar e verificar se está zerada',
             'Balança: peso no centro — conferir e documentar',
             'Balança: peso nas extremidades — conferir e documentar (pesos próprios)',
-            'Termômetros: copo com água e gelo por 5 min — estabilizar entre 0,0 °C e 1,0 °C',
+            { t: 'Termômetros: copo com água e gelo por 5 min — estabilizar entre 0,0 °C e 1,0 °C',
+              campos: [{ id: 'leitura', rotulo: 'Leitura do termômetro', unidade: '°C' }] },
             'Temporizador da batedeira: zerar e acionar junto ao cronômetro — conferir tempos e registrar',
-            'Água: mergulhar a fita, comparar as cores, registrar e colar no controle',
+            { t: 'Água: mergulhar a fita, comparar as cores, registrar e colar no controle',
+              campos: [{ id: 'ph', rotulo: 'pH da água', unidade: '' }] },
         ],
     },
     {
@@ -38,8 +40,13 @@ const FASES_BATIDA = [
         id: 'pesagem', icon: '⚖️', titulo: 'Pesagem dos Ingredientes',
         desc: 'Tare o recipiente vazio antes de cada pesagem e atinja a quantidade exata da ficha.',
         itens: [
-            'Água da massa: tarar o balde e despejar até a quantidade exata',
-            'Água do fermento: tarar, despejar, aferir a temperatura e registrar',
+            { t: 'Água da massa: tarar o balde e despejar até a quantidade exata',
+              campos: [
+                { id: 'temp_agua', rotulo: 'Temp. da água', unidade: '°C' },
+                { id: 'temp_amb',  rotulo: 'Temp. ambiente', unidade: '°C' },
+              ] },
+            { t: 'Água do fermento: tarar, despejar, aferir a temperatura e registrar',
+              campos: [{ id: 'temp_ferm', rotulo: 'Temp. da água do fermento', unidade: '°C' }] },
             'Fermento: tarar o copo e despejar até a quantidade',
             'Pré-mix: pesar a quantidade exata',
             'Óleo de soja: pesar a quantidade exata',
@@ -57,7 +64,8 @@ const FASES_BATIDA = [
             'Adicionar a farinha',
             { t: 'Após a farinha, adicionar o óleo de palma previamente pesado', tipo: 'pan' },
             'Bater 2 min em velocidade baixa e mais 4 min em velocidade alta',
-            'Borrifar óleo na bancada e na tampa, retirar a massa, medir a temperatura e registrar',
+            { t: 'Borrifar óleo na bancada e na tampa, retirar a massa, medir a temperatura e registrar',
+              campos: [{ id: 'temp_massa', rotulo: 'Temp. da massa', unidade: '°C' }] },
         ],
     },
     {
@@ -103,7 +111,12 @@ const FASES_FINAIS = [
         desc: 'Feito UMA vez, ao final de todas as batidas. A massa só é liberada após verificar a fermentação da amostra.',
         itens: [
             'Preencher o Controle de Entrada de Massa no Walk-in',
-            'Descruzamento: descruzar ao atingir 4,4 °C (nunca abaixo de 0,5 °C), em até 4 h; bandeja amarela como tampa',
+            { t: 'Descruzamento: descruzar ao atingir 4,4 °C (nunca abaixo de 0,5 °C), em até 4 h; bandeja amarela como tampa',
+              campos: [
+                { id: 't_primeira', rotulo: '1ª bandeja', unidade: '°C' },
+                { id: 't_meio',     rotulo: 'Bandeja do meio', unidade: '°C' },
+                { id: 't_ultima',   rotulo: 'Última bandeja', unidade: '°C' },
+              ] },
             'Verificar a fermentação das amostras e liberar (não conforme → descartar o lote)',
             'Assar e descartar a amostra e registrar no relatório de produção',
         ],
@@ -120,6 +133,7 @@ const estado = {
     plano: null,            // snapshot do plano da calculadora (com runs anotados)
     cursor: 0,              // índice na tela atual (roteiro)
     marcados: {},           // chave -> bool
+    medicoes: {},           // chaveCampo -> valor (temperaturas, pH, etc.)
     runsConcluidas: {},     // índice da run -> ISO de conclusão
     operador: '', loja: '',
     iniciadoEm: null,
@@ -157,6 +171,7 @@ function iniciarPlano() {
     estado.plano = plano;
     estado.cursor = 0;
     estado.marcados = {};
+    estado.medicoes = {};
     estado.runsConcluidas = {};
     estado.iniciadoEm = new Date().toISOString();
     salvarEstado();
@@ -195,10 +210,25 @@ function chaveItem(tela, i) {
     return `${tela.runNo == null ? 'x' : tela.runNo}:${tela.fase.id}:${i}`;
 }
 
+function chaveCampo(tela, i, campoId) {
+    return `${chaveItem(tela, i)}:${campoId}`;
+}
+
+function medicaoPreenchida(tela, i, campoId) {
+    const v = estado.medicoes[chaveCampo(tela, i, campoId)];
+    return v != null && v.toString().trim() !== '';
+}
+
 function telaCompleta(idx) {
     const tela = roteiro[idx];
     if (!tela || tela.grupo === 'relatorio') return true;
-    return itensVisiveis(tela).every((it) => estado.marcados[chaveItem(tela, it._i)]);
+    return itensVisiveis(tela).every((it) => {
+        if (!estado.marcados[chaveItem(tela, it._i)]) return false;
+        if (it.campos && it.campos.length) {
+            return it.campos.every((c) => medicaoPreenchida(tela, it._i, c.id));
+        }
+        return true;
+    });
 }
 
 function runTemProgresso(runNo) {
@@ -318,12 +348,28 @@ function renderFase() {
     const itensHtml = visiveis.map((it) => {
         const chave = chaveItem(tela, it._i);
         const marc = estado.marcados[chave] ? 'checked' : '';
+        const camposHtml = (it.campos && it.campos.length) ? `
+            <div class="prod-meas">
+                ${it.campos.map((c) => {
+                    const v = estado.medicoes[chaveCampo(tela, it._i, c.id)] || '';
+                    return `<div class="prod-meas-field ${v.toString().trim() === '' ? 'is-empty' : ''}">
+                        <label>${c.rotulo}</label>
+                        <div class="prod-meas-input">
+                            <input type="number" inputmode="decimal" step="0.1" data-i="${it._i}" data-campo="${c.id}" value="${v}" placeholder="—">
+                            ${c.unidade ? `<span>${c.unidade}</span>` : ''}
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>` : '';
         return `
-            <label class="prod-item ${marc ? 'is-checked' : ''}" data-i="${it._i}">
-                <input type="checkbox" ${marc}>
-                <span class="prod-check"></span>
-                <span class="prod-item-text">${it.t}</span>
-            </label>`;
+            <div class="prod-item-wrap">
+                <label class="prod-item ${marc ? 'is-checked' : ''}" data-i="${it._i}">
+                    <input type="checkbox" ${marc}>
+                    <span class="prod-check"></span>
+                    <span class="prod-item-text">${it.t}</span>
+                </label>
+                ${camposHtml}
+            </div>`;
     }).join('');
 
     const refs = refsVisiveis(tela);
@@ -351,10 +397,22 @@ function renderFase() {
 
     body.querySelectorAll('.prod-item').forEach((label) => {
         const i = parseInt(label.dataset.i, 10);
-        const input = label.querySelector('input');
+        const input = label.querySelector('input[type="checkbox"]');
         input.addEventListener('change', () => {
             estado.marcados[chaveItem(tela, i)] = input.checked;
             label.classList.toggle('is-checked', input.checked);
+            salvarEstado();
+            atualizarUI();
+        });
+    });
+
+    body.querySelectorAll('.prod-meas-input input').forEach((inp) => {
+        const i = parseInt(inp.dataset.i, 10);
+        const campo = inp.dataset.campo;
+        inp.addEventListener('input', () => {
+            estado.medicoes[chaveCampo(tela, i, campo)] = inp.value;
+            const field = inp.closest('.prod-meas-field');
+            if (field) field.classList.toggle('is-empty', inp.value.trim() === '');
             salvarEstado();
             atualizarUI();
         });
@@ -502,6 +560,26 @@ function fmt(iso) {
     try { return new Date(iso).toLocaleString('pt-BR'); } catch (_) { return '—'; }
 }
 
+function coletarMedicoes() {
+    const linhas = [];
+    roteiro.forEach((tela) => {
+        if (tela.grupo === 'relatorio') return;
+        const ctx = tela.grupo === 'inicio' ? 'Preparação'
+            : tela.grupo === 'final' ? 'Finalização'
+            : `Batida ${tela.run.n} ${tela.run.tipo === 'pan' ? 'Pan' : 'Trad'}`;
+        itensVisiveis(tela).forEach((it) => {
+            if (!it.campos) return;
+            it.campos.forEach((c) => {
+                const v = estado.medicoes[chaveCampo(tela, it._i, c.id)];
+                if (v != null && v.toString().trim() !== '') {
+                    linhas.push({ ctx, rotulo: c.rotulo, valor: v + (c.unidade ? ' ' + c.unidade : '') });
+                }
+            });
+        });
+    });
+    return linhas;
+}
+
 function gerarRelatorioHTML() {
     const p = estado.plano || { runs: [], pesoTotal: 0, ingredientes: {} };
     const ing = p.ingredientes || {};
@@ -520,6 +598,14 @@ function gerarRelatorioHTML() {
     }).join('');
 
     const ingLinha = (nome, v) => `<span><strong>${nome}:</strong> ${v} kg</span>`;
+
+    const meds = coletarMedicoes();
+    const medHtml = meds.length ? `
+        <h2>Medições registradas</h2>
+        <table class="print-table">
+            <thead><tr><th>Etapa</th><th>Medição</th><th>Valor</th></tr></thead>
+            <tbody>${meds.map((m) => `<tr><td>${m.ctx}</td><td>${m.rotulo}</td><td>${m.valor}</td></tr>`).join('')}</tbody>
+        </table>` : '';
 
     return `
     <div class="print-wrap">
@@ -556,6 +642,8 @@ function gerarRelatorioHTML() {
             <thead><tr><th>#</th><th>Tipo</th><th>Batida</th><th>Status</th><th>Concluída em</th></tr></thead>
             <tbody>${linhas || '<tr><td colspan="5">Nenhuma batida no plano.</td></tr>'}</tbody>
         </table>
+
+        ${medHtml}
 
         <div class="print-sign">
             <div>Responsável pela produção<br><br>____________________________</div>
