@@ -209,6 +209,8 @@ for (const key in inputs) {
 }
 
 btnReset.addEventListener('click', () => {
+    // Limpa também a sessão do assistente de produção (aborta se o usuário cancelar)
+    if (window.limparProducao && !window.limparProducao(true)) return;
     for (const key in inputs) {
         if (inputs[key]) inputs[key].value = '0';
     }

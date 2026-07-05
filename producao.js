@@ -553,6 +553,35 @@ function reiniciar() {
     renderizar();
 }
 
+function temProgressoProducao() {
+    return (estado.marcados && Object.keys(estado.marcados).length > 0)
+        || (estado.medicoes && Object.keys(estado.medicoes).length > 0)
+        || (estado.runsConcluidas && Object.keys(estado.runsConcluidas).length > 0);
+}
+
+// Zera toda a sessão do assistente. Chamado pelo botão "Limpar Dados" da calculadora.
+// Com `confirmar`, pede confirmação se houver produção em andamento (evita perder medições).
+function limparProducao(confirmar) {
+    if (confirmar && temProgressoProducao() &&
+        !window.confirm('Limpar dados vai apagar também o progresso e as medições da produção em andamento. Continuar?')) {
+        return false;
+    }
+    estado.plano = null;
+    estado.cursor = 0;
+    estado.marcados = {};
+    estado.medicoes = {};
+    estado.runsConcluidas = {};
+    estado.operador = '';
+    estado.loja = '';
+    estado.iniciadoEm = null;
+    roteiro = [];
+    try { localStorage.removeItem(STORAGE_KEY); } catch (_) { /* ok */ }
+    const overlay = document.getElementById('prod-overlay');
+    if (overlay && !overlay.hidden) fecharModal();
+    return true;
+}
+window.limparProducao = limparProducao;
+
 // ─── 8. EXPORTAÇÃO EM PDF (via impressão do navegador) ────────────────────────
 
 function fmt(iso) {
