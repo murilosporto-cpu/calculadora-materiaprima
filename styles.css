@@ -1183,6 +1183,60 @@ body {
 }
 .prod-done .prod-btn-next { margin-top: 0.75rem; }
 
+/* Cabeçalho: segmento + ações */
+.prod-seg { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
+.prod-seg-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--dominos-blue-dark);
+}
+.prod-head-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+.prod-export-quick { padding: 0.4rem 0.7rem; font-size: 0.75rem; }
+
+/* Badge da batida atual */
+.prod-batch-badge {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    margin-bottom: 0.9rem;
+}
+.prod-batch-badge.is-trad {
+    color: var(--amber);
+    background: var(--amber-glow);
+    border: 1px solid rgba(182,122,30,0.3);
+}
+.prod-batch-badge.is-pan {
+    color: var(--dominos-blue-dark);
+    background: var(--pan-glow);
+    border: 1px solid rgba(0,144,226,0.35);
+}
+
+/* Campos do relatório */
+.prod-report-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+.prod-field { display: flex; flex-direction: column; gap: 0.3rem; }
+.prod-field span { font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+.prod-field input {
+    background: var(--bg-input);
+    border: 1px solid var(--border-medium);
+    border-radius: 10px;
+    padding: 0.6rem 0.75rem;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    outline: none;
+}
+.prod-field input:focus { border-color: var(--dominos-blue); box-shadow: 0 0 0 3px var(--pan-glow); }
+.prod-report-actions { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
+
 /* Mobile */
 @media (max-width: 600px) {
     .prod-overlay { padding: 0; }
@@ -1194,4 +1248,32 @@ body {
     }
     .prod-step-dot { width: 30px; height: 30px; font-size: 0.85rem; }
     .prod-fase-titulo { font-size: 1.15rem; }
+    .prod-report-fields { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   Relatório para impressão / PDF
+   ============================================================ */
+#prod-report-print { display: none; }
+
+.print-wrap { font-family: 'Inter', Arial, sans-serif; color: #111; max-width: 760px; }
+.print-head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #E10600; padding-bottom: 10px; margin-bottom: 14px; }
+.print-head h1 { font-size: 20px; margin: 0; color: #005586; }
+.print-sub { font-size: 12px; color: #555; margin-top: 2px; }
+.print-meta { font-size: 12px; color: #333; text-align: right; }
+.print-wrap h2 { font-size: 14px; color: #005586; margin: 18px 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+.print-info { display: flex; flex-wrap: wrap; gap: 6px 24px; font-size: 13px; margin-bottom: 6px; }
+.print-ing { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 12px; color: #333; }
+.print-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+.print-table th, .print-table td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+.print-table th { background: #f0f0f0; }
+.print-sign { display: flex; gap: 40px; margin-top: 40px; font-size: 12px; color: #333; }
+.print-sign div { flex: 1; }
+.print-foot { margin-top: 24px; font-size: 10px; color: #888; text-align: center; }
+
+@media print {
+    body { background: #fff !important; padding: 0 !important; }
+    body > *:not(#prod-report-print) { display: none !important; }
+    #prod-report-print { display: block !important; }
+    @page { margin: 16mm; }
 }

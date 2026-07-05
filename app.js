@@ -220,3 +220,56 @@ btnReset.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     calculateIngredients();
 });
+
+// ─── 7. PLANO DE PRODUÇÃO (consumido pelo assistente producao.js) ────────────
+
+function obterPlanoProducao() {
+    const qty = {};
+    for (const key in inputs) {
+        qty[key] = Math.max(0, parseInt(inputs[key].value) || 0);
+    }
+
+    let pesoTrad = 0, pesoPan = 0;
+    for (const key in MASSA_SPECS) {
+        const peso = qty[key] * MASSA_SPECS[key].pesoPorBandeja;
+        if (MASSA_SPECS[key].tipo === 'tradicional') pesoTrad += peso;
+        else                                         pesoPan  += peso;
+    }
+
+    // Converte o peso total em uma lista de batidas: 'cheia' (10kg) ou 'meia' (5kg)
+    function listarBatidas(peso, totalBatch) {
+        if (peso <= 0) return [];
+        const raw    = peso / totalBatch;
+        const cheias = Math.floor(raw);
+        const frac   = raw - cheias;
+        const lista  = [];
+        for (let i = 0; i < cheias; i++) lista.push('cheia');
+        if (frac >= 0.01 && frac <= 0.5) lista.push('meia');
+        else if (frac > 0.5)             lista.push('cheia');
+        return lista;
+    }
+
+    const runs = [];
+    listarBatidas(pesoTrad, BATCH_TRADICIONAL.total).forEach((tam) =>
+        runs.push({ tipo: 'tradicional', tamanho: tam }));
+    listarBatidas(pesoPan, BATCH_PAN.total).forEach((tam) =>
+        runs.push({ tipo: 'pan', tamanho: tam }));
+
+    const val = (id) => (document.getElementById(id) || {}).textContent || '0';
+
+    return {
+        qty,
+        pesoTrad, pesoPan, pesoTotal: pesoTrad + pesoPan,
+        runs,
+        ingredientes: {
+            farinha:   val('total-flour'),
+            agua:      val('total-water'),
+            oleo:      val('total-oil'),
+            premix:    val('total-premix'),
+            fermento:  val('total-yeast'),
+            oleoPalma: val('total-palmoil')
+        }
+    };
+}
+
+window.obterPlanoProducao = obterPlanoProducao;
