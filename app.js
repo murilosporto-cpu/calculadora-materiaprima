@@ -5,10 +5,11 @@
 
 // ─── 1. FICHAS TÉCNICAS POR BATCH ───────────────────────────────────────────
 
+// Ficha técnica — Batida de 10 kg (manual Comissariado 2026, pág. 16-17)
 const BATCH_TRADICIONAL = {
-    total:     16.16,
+    total:     16.26,   // 10 + 5,5 + 0,38 + 0,34 + 0,04
     farinha:   10.00,
-    agua:       5.40,
+    agua:       5.50,   // água total (5,3 massa + 0,2 fermento)
     oleo:       0.38,
     premix:     0.34,
     fermento:   0.04,
@@ -16,22 +17,22 @@ const BATCH_TRADICIONAL = {
 };
 
 const BATCH_PAN = {
-    total:     17.48,
+    total:     17.38,   // 10 + 5,5 + 0,20 + 0,34 + 0,04 + 1,30
     farinha:   10.00,
-    agua:       5.60,
+    agua:       5.50,   // água total (5,3 massa + 0,2 fermento)
     oleo:       0.20,
     premix:     0.34,
     fermento:   0.04,
     oleoPalma:  1.30
 };
 
-// Rendimento por bandeja (kg / bandeja)
+// Peso por bandeja (kg) — valores oficiais da ficha técnica (manual, pág. 10)
 const MASSA_SPECS = {
-    '7':   { tipo: 'tradicional', pesoPorBandeja: 16.16 / 10 },  // 1.616 kg
-    '85':  { tipo: 'tradicional', pesoPorBandeja: 16.16 / 6  },  // ~2.693 kg
-    '115': { tipo: 'tradicional', pesoPorBandeja: 16.16 / 5  },  // 3.232 kg
-    '14':  { tipo: 'tradicional', pesoPorBandeja: 16.16 / 5  },  // 3.232 kg
-    'pan': { tipo: 'pan',         pesoPorBandeja: 17.48 / 5  }   // 3.496 kg
+    '7':   { tipo: 'tradicional', pesoPorBandeja: 1.560 },  // Bandeja 7"
+    '85':  { tipo: 'tradicional', pesoPorBandeja: 2.920 },  // Bandeja 8,5" (tabela de rendimento)
+    '115': { tipo: 'tradicional', pesoPorBandeja: 2.920 },  // Bandeja 11,5"
+    '14':  { tipo: 'tradicional', pesoPorBandeja: 3.240 },  // Bandeja 14"
+    'pan': { tipo: 'pan',         pesoPorBandeja: 3.150 }   // Bandeja 11,5" Pan
 };
 
 // ─── 2. CHART (removido) ─────────────────────────────────────────────────────
@@ -208,6 +209,8 @@ for (const key in inputs) {
 }
 
 btnReset.addEventListener('click', () => {
+    // Limpa também a sessão do assistente de produção (aborta se o usuário cancelar)
+    if (window.limparProducao && !window.limparProducao(true)) return;
     for (const key in inputs) {
         if (inputs[key]) inputs[key].value = '0';
     }
@@ -219,3 +222,56 @@ btnReset.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     calculateIngredients();
 });
+
+// ─── 7. PLANO DE PRODUÇÃO (consumido pelo assistente producao.js) ────────────
+
+function obterPlanoProducao() {
+    const qty = {};
+    for (const key in inputs) {
+        qty[key] = Math.max(0, parseInt(inputs[key].value) || 0);
+    }
+
+    let pesoTrad = 0, pesoPan = 0;
+    for (const key in MASSA_SPECS) {
+        const peso = qty[key] * MASSA_SPECS[key].pesoPorBandeja;
+        if (MASSA_SPECS[key].tipo === 'tradicional') pesoTrad += peso;
+        else                                         pesoPan  += peso;
+    }
+
+    // Converte o peso total em uma lista de batidas: 'cheia' (10kg) ou 'meia' (5kg)
+    function listarBatidas(peso, totalBatch) {
+        if (peso <= 0) return [];
+        const raw    = peso / totalBatch;
+        const cheias = Math.floor(raw);
+        const frac   = raw - cheias;
+        const lista  = [];
+        for (let i = 0; i < cheias; i++) lista.push('cheia');
+        if (frac >= 0.01 && frac <= 0.5) lista.push('meia');
+        else if (frac > 0.5)             lista.push('cheia');
+        return lista;
+    }
+
+    const runs = [];
+    listarBatidas(pesoTrad, BATCH_TRADICIONAL.total).forEach((tam) =>
+        runs.push({ tipo: 'tradicional', tamanho: tam }));
+    listarBatidas(pesoPan, BATCH_PAN.total).forEach((tam) =>
+        runs.push({ tipo: 'pan', tamanho: tam }));
+
+    const val = (id) => (document.getElementById(id) || {}).textContent || '0';
+
+    return {
+        qty,
+        pesoTrad, pesoPan, pesoTotal: pesoTrad + pesoPan,
+        runs,
+        ingredientes: {
+            farinha:   val('total-flour'),
+            agua:      val('total-water'),
+            oleo:      val('total-oil'),
+            premix:    val('total-premix'),
+            fermento:  val('total-yeast'),
+            oleoPalma: val('total-palmoil')
+        }
+    };
+}
+
+window.obterPlanoProducao = obterPlanoProducao;

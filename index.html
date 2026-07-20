@@ -8,7 +8,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=6">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="logos_svg/DPZ_2025_Logo_Tile_Blue_RGB.svg">
 </head>
 <body>
 
@@ -25,8 +27,8 @@
         <!-- ===== HEADER ===== -->
         <header class="app-header">
             <div class="logo-area">
-                <!-- Domino's Pizza New Official Logo (CombinationMark Horizontal White) -->
-                <img src="logos_svg/DPZ_2025_Logo_CombinationMark_Horizontal_White_RGB.svg" alt="Domino's Pizza Logo" class="dominos-logo">
+                <!-- Domino's Pizza New Official Logo (CombinationMark Horizontal Blue) -->
+                <img src="logos_svg/DPZ_2025_Logo_CombinationMark_Horizontal_Blue_RGB.svg" alt="Domino's Pizza Logo" class="dominos-logo">
                 
                 <div class="brand-text-area">
                     <p class="subtitle" style="margin-top: 4px; letter-spacing: 0.15em;">Calculadora de Matéria-Prima</p>
@@ -34,6 +36,10 @@
             </div>
 
             <div class="header-right" style="display: flex; align-items: center; gap: 1rem;">
+                <button type="button" id="btn-iniciar-producao" class="btn btn-producao">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Iniciar Produção de Massa
+                </button>
                 <a href="Treinamento comissariado 2026 PDF.pdf" class="btn btn-secondary" style="text-decoration: none;" download>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-presentation"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="M12 16v4"/><path d="M10 20h4"/><path d="m10 9 4 3-4 3Z"/></svg>
                     Treinamento Comissariado
@@ -132,7 +138,7 @@
 
                     <!-- Separator: Pan -->
                     <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:-0.25rem;margin-top:0.25rem">
-                        <span class="section-chip chip-pan">🟩 Massa Pan</span>
+                        <span class="section-chip chip-pan">🟦 Massa Pan</span>
                     </div>
 
                     <!-- Mass Pan -->
@@ -208,13 +214,13 @@
 
                     <!-- Farinha -->
                     <div class="ingredient-item">
-                        <div class="ing-dot" style="color:#f59e0b;background:#f59e0b;"></div>
+                        <div class="ing-dot" style="color:#C6881B;background:#C6881B;"></div>
                         <div class="ing-info">
                             <div class="ing-name">Farinha de Trigo</div>
                             <div class="ing-origin">Tradicional + Pan</div>
                         </div>
                         <div class="ing-bar-wrap">
-                            <div class="ing-bar" id="bar-flour" style="background:#f59e0b;width:0%"></div>
+                            <div class="ing-bar" id="bar-flour" style="background:#C6881B;width:0%"></div>
                         </div>
                         <div class="ing-val-wrap">
                             <div class="ing-value"><span id="total-flour">0.000</span><span class="unit"> kg</span></div>
@@ -223,13 +229,13 @@
 
                     <!-- Água -->
                     <div class="ingredient-item">
-                        <div class="ing-dot" style="color:#06b6d4;background:#06b6d4;"></div>
+                        <div class="ing-dot" style="color:#0090E2;background:#0090E2;"></div>
                         <div class="ing-info">
                             <div class="ing-name">Água</div>
                             <div class="ing-origin">Tradicional + Pan</div>
                         </div>
                         <div class="ing-bar-wrap">
-                            <div class="ing-bar" id="bar-water" style="background:#06b6d4;width:0%"></div>
+                            <div class="ing-bar" id="bar-water" style="background:#0090E2;width:0%"></div>
                         </div>
                         <div class="ing-val-wrap">
                             <div class="ing-value"><span id="total-water">0.000</span><span class="unit"> kg</span></div>
@@ -238,13 +244,13 @@
 
                     <!-- Óleo -->
                     <div class="ingredient-item">
-                        <div class="ing-dot" style="color:#6366f1;background:#6366f1;"></div>
+                        <div class="ing-dot" style="color:#B77F4E;background:#B77F4E;"></div>
                         <div class="ing-info">
                             <div class="ing-name">Óleo Vegetal</div>
                             <div class="ing-origin">Tradicional + Pan</div>
                         </div>
                         <div class="ing-bar-wrap">
-                            <div class="ing-bar" id="bar-oil" style="background:#6366f1;width:0%"></div>
+                            <div class="ing-bar" id="bar-oil" style="background:#B77F4E;width:0%"></div>
                         </div>
                         <div class="ing-val-wrap">
                             <div class="ing-value"><span id="total-oil">0.000</span><span class="unit"> kg</span></div>
@@ -253,13 +259,13 @@
 
                     <!-- Pré-mix -->
                     <div class="ingredient-item">
-                        <div class="ing-dot" style="color:#a855f7;background:#a855f7;"></div>
+                        <div class="ing-dot" style="color:#9C7245;background:#9C7245;"></div>
                         <div class="ing-info">
                             <div class="ing-name">Pré-mix</div>
                             <div class="ing-origin">Tradicional + Pan</div>
                         </div>
                         <div class="ing-bar-wrap">
-                            <div class="ing-bar" id="bar-premix" style="background:#a855f7;width:0%"></div>
+                            <div class="ing-bar" id="bar-premix" style="background:#9C7245;width:0%"></div>
                         </div>
                         <div class="ing-val-wrap">
                             <div class="ing-value"><span id="total-premix">0.000</span><span class="unit"> kg</span></div>
@@ -268,13 +274,13 @@
 
                     <!-- Fermento -->
                     <div class="ingredient-item">
-                        <div class="ing-dot" style="color:#ec4899;background:#ec4899;"></div>
+                        <div class="ing-dot" style="color:#C0453B;background:#C0453B;"></div>
                         <div class="ing-info">
                             <div class="ing-name">Fermento</div>
                             <div class="ing-origin">Tradicional + Pan</div>
                         </div>
                         <div class="ing-bar-wrap">
-                            <div class="ing-bar" id="bar-yeast" style="background:#ec4899;width:0%"></div>
+                            <div class="ing-bar" id="bar-yeast" style="background:#C0453B;width:0%"></div>
                         </div>
                         <div class="ing-val-wrap">
                             <div class="ing-value"><span id="total-yeast">0.000</span><span class="unit"> kg</span></div>
@@ -283,13 +289,13 @@
 
                     <!-- Óleo de Palma -->
                     <div class="ingredient-item highlight-pan">
-                        <div class="ing-dot" style="color:#10d9a0;background:#10d9a0;"></div>
+                        <div class="ing-dot" style="color:#005586;background:#005586;"></div>
                         <div class="ing-info">
                             <div class="ing-name">Óleo de Palma</div>
                             <div class="ing-origin">Apenas Massa Pan</div>
                         </div>
                         <div class="ing-bar-wrap">
-                            <div class="ing-bar" id="bar-palmoil" style="background:#10d9a0;width:0%"></div>
+                            <div class="ing-bar" id="bar-palmoil" style="background:#005586;width:0%"></div>
                         </div>
                         <div class="ing-val-wrap">
                             <div class="ing-value"><span id="total-palmoil">0.000</span><span class="unit"> kg</span></div>
@@ -306,6 +312,7 @@
 
     </div>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=6"></script>
+    <script src="producao.js?v=6"></script>
 </body>
 </html>
