@@ -57,6 +57,13 @@
                 <div class="panel-header">
                     <div class="panel-header-row">
                         <h2 class="panel-title">Planejamento de Produção</h2>
+                        <div class="batch-size-selector-wrap" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <label for="select-batch-size" style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Lote Base:</label>
+                            <select id="select-batch-size" style="background: var(--bg-input); border: 1px solid var(--border-medium); border-radius: 8px; color: var(--text-primary); font-family: var(--font-sans); font-size: 0.82rem; font-weight: 700; padding: 0.35rem 0.6rem; outline: none; cursor: pointer; transition: var(--transition);">
+                                <option value="10" selected>10 kg de farinha</option>
+                                <option value="15">15 kg de farinha</option>
+                            </select>
+                        </div>
                     </div>
                     <p class="panel-desc">Insira a quantidade de bandejas planejada para cada tipo de massa.</p>
                 </div>

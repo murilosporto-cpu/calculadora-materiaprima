@@ -5,8 +5,8 @@
 
 // ─── 1. FICHAS TÉCNICAS POR BATCH ───────────────────────────────────────────
 
-// Ficha técnica — Batida de 10 kg (manual Comissariado 2026, pág. 16-17)
-const BATCH_TRADICIONAL = {
+// Ficha técnica base — Batida de 10 kg (valores de referência padrão)
+const BASE_BATCH_TRADICIONAL = {
     total:     16.26,   // 10 + 5,5 + 0,38 + 0,34 + 0,04
     farinha:   10.00,
     agua:       5.50,   // água total (5,3 massa + 0,2 fermento)
@@ -16,7 +16,7 @@ const BATCH_TRADICIONAL = {
     oleoPalma:  0.00
 };
 
-const BATCH_PAN = {
+const BASE_BATCH_PAN = {
     total:     17.38,   // 10 + 5,5 + 0,20 + 0,34 + 0,04 + 1,30
     farinha:   10.00,
     agua:       5.50,   // água total (5,3 massa + 0,2 fermento)
@@ -25,6 +25,10 @@ const BATCH_PAN = {
     fermento:   0.04,
     oleoPalma:  1.30
 };
+
+// Batches ativos (serão recalculados dinamicamente)
+let BATCH_TRADICIONAL = { ...BASE_BATCH_TRADICIONAL };
+let BATCH_PAN = { ...BASE_BATCH_PAN };
 
 // Peso por bandeja (kg) — valores oficiais da ficha técnica (manual, pág. 10)
 const MASSA_SPECS = {
@@ -81,6 +85,37 @@ const btnReset = document.getElementById('btn-reset');
 // ─── 4. CÁLCULO PRINCIPAL ────────────────────────────────────────────────────
 
 function calculateIngredients() {
+    // 1. Obter e aplicar tamanho do lote (10kg ou 15kg)
+    const selectBatchSize = document.getElementById('select-batch-size');
+    const baseDoughSize = selectBatchSize ? parseFloat(selectBatchSize.value) : 10;
+    const scaleFactor = baseDoughSize / 10; // 1.0 ou 1.5
+
+    // Escalar as fichas técnicas
+    BATCH_TRADICIONAL.farinha = BASE_BATCH_TRADICIONAL.farinha * scaleFactor;
+    BATCH_TRADICIONAL.agua = BASE_BATCH_TRADICIONAL.agua * scaleFactor;
+    BATCH_TRADICIONAL.oleo = BASE_BATCH_TRADICIONAL.oleo * scaleFactor;
+    BATCH_TRADICIONAL.premix = BASE_BATCH_TRADICIONAL.premix * scaleFactor;
+    BATCH_TRADICIONAL.fermento = BASE_BATCH_TRADICIONAL.fermento * scaleFactor;
+    BATCH_TRADICIONAL.total = BATCH_TRADICIONAL.farinha + BATCH_TRADICIONAL.agua + BATCH_TRADICIONAL.oleo + BATCH_TRADICIONAL.premix + BATCH_TRADICIONAL.fermento;
+
+    BATCH_PAN.farinha = BASE_BATCH_PAN.farinha * scaleFactor;
+    BATCH_PAN.agua = BASE_BATCH_PAN.agua * scaleFactor;
+    BATCH_PAN.oleo = BASE_BATCH_PAN.oleo * scaleFactor;
+    BATCH_PAN.premix = BASE_BATCH_PAN.premix * scaleFactor;
+    BATCH_PAN.fermento = BASE_BATCH_PAN.fermento * scaleFactor;
+    BATCH_PAN.oleoPalma = BASE_BATCH_PAN.oleoPalma * scaleFactor;
+    BATCH_PAN.total = BATCH_PAN.farinha + BATCH_PAN.agua + BATCH_PAN.oleo + BATCH_PAN.premix + BATCH_PAN.fermento + BATCH_PAN.oleoPalma;
+
+    // Atualizar dinamicamente o peso por bandeja de 11.5" e 14" (que rendem 5 bandejas por batida)
+    MASSA_SPECS['115'].pesoPorBandeja = BATCH_TRADICIONAL.total / 5;
+    MASSA_SPECS['14'].pesoPorBandeja = BATCH_TRADICIONAL.total / 5;
+
+    // Atualizar labels informativos nas opções (opcional, mas bom para clareza)
+    const meta115 = document.querySelector('#group-115 .mass-meta');
+    const meta14 = document.querySelector('#group-14 .mass-meta');
+    if (meta115) meta115.textContent = `5 bandejas / batch (${baseDoughSize}kg farinha)`;
+    if (meta14) meta14.textContent = `5 bandejas / batch (${baseDoughSize}kg farinha)`;
+
     // Ler quantidades de bandejas
     const qty = {};
     for (const key in inputs) {
@@ -399,6 +434,11 @@ btnReset.addEventListener('click', () => {
 // ─── 6. INIT ─────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Configura o evento 'change' do seletor de tamanho do lote base (10kg vs 15kg)
+    const selectBatchSize = document.getElementById('select-batch-size');
+    if (selectBatchSize) {
+        selectBatchSize.addEventListener('change', calculateIngredients);
+    }
     calculateIngredients();
 });
 
@@ -436,11 +476,13 @@ function obterPlanoProducao() {
     listarBatidas(pesoPan, BATCH_PAN.total).forEach((tam) =>
         runs.push({ tipo: 'pan', tamanho: tam }));
 
-    const val = (id) => (document.getElementById(id) || {}).textContent || '0';
+    const selectBatchSize = document.getElementById('select-batch-size');
+    const farinhaLoteBase = selectBatchSize ? parseFloat(selectBatchSize.value) : 10;
 
     return {
         qty,
         pesoTrad, pesoPan, pesoTotal: pesoTrad + pesoPan,
+        farinhaLoteBase,
         runs,
         ingredientes: {
             farinha:   val('total-flour'),

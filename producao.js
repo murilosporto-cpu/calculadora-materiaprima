@@ -249,8 +249,11 @@ function progresso() {
 }
 
 function rotuloRun(run) {
+    const loteBase = (estado.plano && estado.plano.farinhaLoteBase) ? estado.plano.farinhaLoteBase : 10;
     const tipo = run.tipo === 'pan' ? 'Massa Pan' : 'Massa Tradicional';
-    const tam  = run.tamanho === 'meia' ? '5 kg (meia batida)' : '10 kg (batida cheia)';
+    const pesoCheio = loteBase;
+    const pesoMeio = loteBase / 2;
+    const tam  = run.tamanho === 'meia' ? `${String(pesoMeio).replace('.', ',')} kg (meia batida)` : `${pesoCheio} kg (batida cheia)`;
     return `${tipo} · Batida ${run.n} de ${run.totalTipo} · ${tam}`;
 }
 
@@ -614,13 +617,17 @@ function gerarRelatorioHTML() {
     const ing = p.ingredientes || {};
     const feitas = Object.keys(estado.runsConcluidas).length;
 
+    const loteBase = p.farinhaLoteBase || 10;
+    const pesoCheio = `${loteBase} kg`;
+    const pesoMeio = `${String(loteBase / 2).replace('.', ',')} kg`;
+
     const linhas = p.runs.map((r, i) => {
         const done = estado.runsConcluidas[i];
         const status = done ? 'Concluída' : (runTemProgresso(i) ? 'Parcial' : 'Não realizada');
         return `<tr>
             <td>${i + 1}</td>
             <td>${r.tipo === 'pan' ? 'Massa Pan' : 'Massa Tradicional'}</td>
-            <td>${r.tamanho === 'meia' ? '5 kg' : '10 kg'}</td>
+            <td>${r.tamanho === 'meia' ? pesoMeio : pesoCheio}</td>
             <td>${status}</td>
             <td>${fmt(done)}</td>
         </tr>`;
