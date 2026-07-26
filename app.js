@@ -199,34 +199,58 @@ function calculateIngredients() {
             const targetFloor = Math.floor(currentBatches);
             const targetCeil = Math.ceil(currentBatches);
             
-            // Proximidade de fração para sugestões
+            // Fração atual
             const fraction = currentBatches - targetFloor;
 
             if (fraction > 0.01) {
                 suggestionsHTML += `<div style="margin-bottom: 0.5rem;"><strong style="color: var(--amber);">Massa Tradicional (${currentBatches.toFixed(2).replace('.', ',')} batidas):</strong></div>`;
 
-                // Sugestão 1: Reduzir para a batida inteira anterior (Floor)
-                // Quanto de peso a menos precisamos
-                const diffWeightFloor = pesoTrad - (targetFloor * batchSize);
-                const floorOptions = getTrayCombinationSuggestions(diffWeightFloor);
-                
-                // Sugestão 2: Aumentar para a próxima batida inteira (Ceil)
-                const diffWeightCeil = (targetCeil * batchSize) - pesoTrad;
-                const ceilOptions = getTrayCombinationSuggestions(diffWeightCeil);
+                // Determinar o ponto de meia batida mais próximo (ex: 0.5, 1.5, 2.5...)
+                const targetHalf = targetFloor + 0.5;
 
+                // Sugestão para fechar em Batida Inteira para baixo
                 if (targetFloor > 0) {
+                    const diffWeightFloor = pesoTrad - (targetFloor * batchSize);
+                    const floorOptions = getTrayCombinationSuggestions(diffWeightFloor);
                     suggestionsHTML += `
                         <div class="suggestion-item">
                             <span class="suggestion-bullet">▼</span>
-                            <span class="suggestion-text">Para economizar insumos e bater exatamente <strong>${targetFloor} batida(s)</strong>, você pode produzir <strong>menos</strong>: ${floorOptions}</span>
+                            <span class="suggestion-text">Para bater exatamente <strong>${targetFloor} batida(s)</strong>, produza <strong>menos</strong>: ${floorOptions}</span>
                         </div>
                     `;
                 }
-                
+
+                // Sugestão para fechar em Meia Batida (seja para mais ou para menos)
+                const diffWeightHalf = pesoTrad - (targetHalf * batchSize);
+                if (Math.abs(diffWeightHalf) > 0.05) {
+                    if (diffWeightHalf > 0) {
+                        // Precisa diminuir para fechar na meia batida
+                        const halfOptions = getTrayCombinationSuggestions(diffWeightHalf);
+                        suggestionsHTML += `
+                            <div class="suggestion-item">
+                                <span class="suggestion-bullet">🌓</span>
+                                <span class="suggestion-text">Para bater exatamente <strong>${String(targetHalf).replace('.', ',')} batida(s)</strong>, produza <strong>menos</strong>: ${halfOptions}</span>
+                            </div>
+                        `;
+                    } else {
+                        // Precisa aumentar para fechar na meia batida
+                        const halfOptions = getTrayCombinationSuggestions(Math.abs(diffWeightHalf));
+                        suggestionsHTML += `
+                            <div class="suggestion-item">
+                                <span class="suggestion-bullet">🌓</span>
+                                <span class="suggestion-text">Para bater exatamente <strong>${String(targetHalf).replace('.', ',')} batida(s)</strong>, produza <strong>a mais</strong>: ${halfOptions}</span>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Sugestão para fechar em Batida Inteira para cima
+                const diffWeightCeil = (targetCeil * batchSize) - pesoTrad;
+                const ceilOptions = getTrayCombinationSuggestions(diffWeightCeil);
                 suggestionsHTML += `
                     <div class="suggestion-item">
                         <span class="suggestion-bullet">▲</span>
-                        <span class="suggestion-text">Para aproveitar o lote e fechar exatamente <strong>${targetCeil} batida(s)</strong> sem sobras, você pode produzir <strong>a mais</strong>: ${ceilOptions}</span>
+                        <span class="suggestion-text">Para fechar exatamente <strong>${targetCeil} batida(s)</strong>, produza <strong>a mais</strong>: ${ceilOptions}</span>
                     </div>
                 `;
             }
@@ -246,12 +270,11 @@ function calculateIngredients() {
                 }
                 suggestionsHTML += `<div style="margin-bottom: 0.5rem;"><strong style="color: var(--pan-color);">Massa Pan (${currentBatches.toFixed(2).replace('.', ',')} batidas):</strong></div>`;
 
+                const targetHalf = targetFloor + 0.5;
+
+                // Batida inteira para baixo
                 const diffWeightFloor = pesoPan - (targetFloor * batchSize);
                 const floorPanTrays = Math.round(diffWeightFloor / MASSA_SPECS.pan.pesoPorBandeja);
-                
-                const diffWeightCeil = (targetCeil * batchSize) - pesoPan;
-                const ceilPanTrays = Math.round(diffWeightCeil / MASSA_SPECS.pan.pesoPorBandeja);
-
                 if (targetFloor > 0 && floorPanTrays > 0) {
                     suggestionsHTML += `
                         <div class="suggestion-item">
@@ -260,6 +283,31 @@ function calculateIngredients() {
                         </div>
                     `;
                 }
+
+                // Meia batida
+                const diffWeightHalf = pesoPan - (targetHalf * batchSize);
+                const halfPanTrays = Math.round(Math.abs(diffWeightHalf) / MASSA_SPECS.pan.pesoPorBandeja);
+                if (halfPanTrays > 0) {
+                    if (diffWeightHalf > 0) {
+                        suggestionsHTML += `
+                            <div class="suggestion-item">
+                                <span class="suggestion-bullet">🌓</span>
+                                <span class="suggestion-text">Para bater exatamente <strong>${String(targetHalf).replace('.', ',')} batida(s) Pan</strong>, reduza <strong>${halfPanTrays} bandeja(s) Pan</strong>.</span>
+                            </div>
+                        `;
+                    } else {
+                        suggestionsHTML += `
+                            <div class="suggestion-item">
+                                <span class="suggestion-bullet">🌓</span>
+                                <span class="suggestion-text">Para bater exatamente <strong>${String(targetHalf).replace('.', ',')} batida(s) Pan</strong>, adicione mais <strong>${halfPanTrays} bandeja(s) Pan</strong>.</span>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Batida inteira para cima
+                const diffWeightCeil = (targetCeil * batchSize) - pesoPan;
+                const ceilPanTrays = Math.round(diffWeightCeil / MASSA_SPECS.pan.pesoPorBandeja);
                 if (ceilPanTrays > 0) {
                     suggestionsHTML += `
                         <div class="suggestion-item">
