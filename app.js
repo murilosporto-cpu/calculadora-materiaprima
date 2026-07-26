@@ -31,7 +31,7 @@ const MASSA_SPECS = {
     '7':   { tipo: 'tradicional', pesoPorBandeja: 1.560 },  // Bandeja 7"
     '85':  { tipo: 'tradicional', pesoPorBandeja: 2.920 },  // Bandeja 8,5" (tabela de rendimento)
     '115': { tipo: 'tradicional', pesoPorBandeja: 16.26 / 5 },  // Bandeja 11,5" (rende exatamente 5 bandejas por batida)
-    '14':  { tipo: 'tradicional', pesoPorBandeja: 3.240 },  // Bandeja 14"
+    '14':  { tipo: 'tradicional', pesoPorBandeja: 16.26 / 5 },  // Bandeja 14" (rende exatamente 5 bandejas por batida)
     'pan': { tipo: 'pan',         pesoPorBandeja: 3.150 }   // Bandeja 11,5" Pan
 };
 
