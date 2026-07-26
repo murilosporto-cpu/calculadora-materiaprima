@@ -173,15 +173,35 @@ function calculateIngredients() {
 
         // Exato — sem fração
         if (fracPart < 0.01) {
-            return { display: String(intPart), hint: 'batida(s) necessária(s)' };
+            return { display: String(intPart), hint: 'batida(s) de ' + baseDoughSize + 'kg' };
         }
-        // Fração ≤ 0.5 — sugerir meia batida
+
+        // Se o lote de fábrica for de 15kg, não há meia batida de 7,5kg.
+        // Orientamos a produzir usando os tachos menores de 10kg ou 5kg (meia batida de 10kg).
+        if (baseDoughSize === 15) {
+            const pesoExcedente = fracPart * BATCH_TRADICIONAL.total; // peso de massa que excedeu os lotes de 15kg
+            
+            // Peso de 1 lote de 10kg é ~16.26kg, peso de 5kg é ~8.13kg
+            const totalBatch10 = BASE_BATCH_TRADICIONAL.total;
+            const totalBatch5 = totalBatch10 / 2;
+
+            if (pesoExcedente <= totalBatch5) {
+                return { display: intPart + ' (15kg) + 1 (5kg)', hint: '💡 sugestão: 1 batida de 5kg para a sobra' };
+            } else if (pesoExcedente <= totalBatch10) {
+                return { display: intPart + ' (15kg) + 1 (10kg)', hint: '💡 sugestão: 1 batida de 10kg para a sobra' };
+            } else {
+                // Caso passe de 10kg (ex: aproximando de 15kg), arredonda para a próxima inteira de 15kg
+                return { display: String(intPart + 1), hint: 'batida(s) de 15kg' };
+            }
+        }
+
+        // Caso padrão (Lote de 10kg): Fração ≤ 0.5 — sugerir meia batida
         if (fracPart <= 0.5) {
             const decimalVal = intPart + 0.5;
-            return { display: String(decimalVal).replace('.', ','), hint: '💡 sugestão: meia batida' };
+            return { display: String(decimalVal).replace('.', ','), hint: '💡 sugestão: meia batida (5kg)' };
         }
         // Fração > 0.5 — arredondar para cima
-        return { display: String(intPart + 1), hint: 'batida(s) necessária(s)' };
+        return { display: String(intPart + 1), hint: 'batida(s) de 10kg' };
     }
 
     const tradResult = formatBatida(rawTrad);
@@ -255,27 +275,29 @@ function calculateIngredients() {
                     `;
                 }
 
-                // Sugestão para fechar em Meia Batida (seja para mais ou para menos)
-                const diffWeightHalf = pesoTrad - (targetHalf * batchSize);
-                if (Math.abs(diffWeightHalf) > 0.05) {
-                    if (diffWeightHalf > 0) {
-                        // Precisa diminuir para fechar na meia batida
-                        const halfOptions = getTrayCombinationSuggestions(diffWeightHalf);
-                        suggestionsHTML += `
-                            <div class="suggestion-item">
-                                <span class="suggestion-bullet">🌓</span>
-                                <span class="suggestion-text">Para bater exatamente <strong>${String(targetHalf).replace('.', ',')} batida(s)</strong>, produza <strong>menos</strong>: ${halfOptions}</span>
-                            </div>
-                        `;
-                    } else {
-                        // Precisa aumentar para fechar na meia batida
-                        const halfOptions = getTrayCombinationSuggestions(Math.abs(diffWeightHalf));
-                        suggestionsHTML += `
-                            <div class="suggestion-item">
-                                <span class="suggestion-bullet">🌓</span>
-                                <span class="suggestion-text">Para bater exatamente <strong>${String(targetHalf).replace('.', ',')} batida(s)</strong>, produza <strong>a mais</strong>: ${halfOptions}</span>
-                            </div>
-                        `;
+                // Sugestão para fechar em Meia Batida (seja para mais ou para menos) - APENAS se o lote base for 10kg
+                if (baseDoughSize === 10) {
+                    const diffWeightHalf = pesoTrad - (targetHalf * batchSize);
+                    if (Math.abs(diffWeightHalf) > 0.05) {
+                        if (diffWeightHalf > 0) {
+                            // Precisa diminuir para fechar na meia batida
+                            const halfOptions = getTrayCombinationSuggestions(diffWeightHalf);
+                            suggestionsHTML += `
+                                <div class="suggestion-item">
+                                    <span class="suggestion-bullet">🌓</span>
+                                    <span class="suggestion-text">Para bater exatamente <strong>${String(targetHalf).replace('.', ',')} batida(s)</strong>, produza <strong>menos</strong>: ${halfOptions}</span>
+                                </div>
+                            `;
+                        } else {
+                            // Precisa aumentar para fechar na meia batida
+                            const halfOptions = getTrayCombinationSuggestions(Math.abs(diffWeightHalf));
+                            suggestionsHTML += `
+                                <div class="suggestion-item">
+                                    <span class="suggestion-bullet">🌓</span>
+                                    <span class="suggestion-text">Para bater exatamente <strong>${String(targetHalf).replace('.', ',')} batida(s)</strong>, produza <strong>a mais</strong>: ${halfOptions}</span>
+                                </div>
+                            `;
+                        }
                     }
                 }
 
@@ -319,24 +341,26 @@ function calculateIngredients() {
                     `;
                 }
 
-                // Meia batida
-                const diffWeightHalf = pesoPan - (targetHalf * batchSize);
-                const halfPanTrays = Math.round(Math.abs(diffWeightHalf) / MASSA_SPECS.pan.pesoPorBandeja);
-                if (halfPanTrays > 0) {
-                    if (diffWeightHalf > 0) {
-                        suggestionsHTML += `
-                            <div class="suggestion-item">
-                                <span class="suggestion-bullet">🌓</span>
-                                <span class="suggestion-text">Para bater exatamente <strong>${String(targetHalf).replace('.', ',')} batida(s) Pan</strong>, reduza <strong>${halfPanTrays} bandeja(s) Pan</strong>.</span>
-                            </div>
-                        `;
-                    } else {
-                        suggestionsHTML += `
-                            <div class="suggestion-item">
-                                <span class="suggestion-bullet">🌓</span>
-                                <span class="suggestion-text">Para bater exatamente <strong>${String(targetHalf).replace('.', ',')} batida(s) Pan</strong>, adicione mais <strong>${halfPanTrays} bandeja(s) Pan</strong>.</span>
-                            </div>
-                        `;
+                // Meia batida - APENAS se o lote base for 10kg
+                if (baseDoughSize === 10) {
+                    const diffWeightHalf = pesoPan - (targetHalf * batchSize);
+                    const halfPanTrays = Math.round(Math.abs(diffWeightHalf) / MASSA_SPECS.pan.pesoPorBandeja);
+                    if (halfPanTrays > 0) {
+                        if (diffWeightHalf > 0) {
+                            suggestionsHTML += `
+                                <div class="suggestion-item">
+                                    <span class="suggestion-bullet">🌓</span>
+                                    <span class="suggestion-text">Para bater exatamente <strong>${String(targetHalf).replace('.', ',')} batida(s) Pan</strong>, reduza <strong>${halfPanTrays} bandeja(s) Pan</strong>.</span>
+                                </div>
+                            `;
+                        } else {
+                            suggestionsHTML += `
+                                <div class="suggestion-item">
+                                    <span class="suggestion-bullet">🌓</span>
+                                    <span class="suggestion-text">Para bater exatamente <strong>${String(targetHalf).replace('.', ',')} batida(s) Pan</strong>, adicione mais <strong>${halfPanTrays} bandeja(s) Pan</strong>.</span>
+                                </div>
+                            `;
+                        }
                     }
                 }
 
