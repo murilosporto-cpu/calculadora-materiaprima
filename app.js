@@ -34,8 +34,8 @@ let BATCH_PAN = { ...BASE_BATCH_PAN };
 const MASSA_SPECS = {
     '7':   { tipo: 'tradicional', pesoPorBandeja: 1.560 },  // Bandeja 7"
     '85':  { tipo: 'tradicional', pesoPorBandeja: 2.920 },  // Bandeja 8,5" (tabela de rendimento)
-    '115': { tipo: 'tradicional', pesoPorBandeja: 16.26 / 5 },  // Bandeja 11,5" (rende exatamente 5 bandejas por batida)
-    '14':  { tipo: 'tradicional', pesoPorBandeja: 16.26 / 5 },  // Bandeja 14" (rende exatamente 5 bandejas por batida)
+    '115': { tipo: 'tradicional', pesoPorBandeja: BASE_BATCH_TRADICIONAL.total / 5 },  // Bandeja 11,5" (rende exatamente 5 bandejas por batida de 10kg)
+    '14':  { tipo: 'tradicional', pesoPorBandeja: BASE_BATCH_TRADICIONAL.total / 5 },  // Bandeja 14" (rende exatamente 5 bandejas por batida de 10kg)
     'pan': { tipo: 'pan',         pesoPorBandeja: 3.150 }   // Bandeja 11,5" Pan
 };
 
@@ -106,15 +106,11 @@ function calculateIngredients() {
     BATCH_PAN.oleoPalma = BASE_BATCH_PAN.oleoPalma * scaleFactor;
     BATCH_PAN.total = BATCH_PAN.farinha + BATCH_PAN.agua + BATCH_PAN.oleo + BATCH_PAN.premix + BATCH_PAN.fermento + BATCH_PAN.oleoPalma;
 
-    // Atualizar dinamicamente o peso por bandeja de 11.5" e 14" (que rendem 5 bandejas por batida)
-    MASSA_SPECS['115'].pesoPorBandeja = BATCH_TRADICIONAL.total / 5;
-    MASSA_SPECS['14'].pesoPorBandeja = BATCH_TRADICIONAL.total / 5;
-
     // Atualizar labels informativos nas opções (opcional, mas bom para clareza)
     const meta115 = document.querySelector('#group-115 .mass-meta');
     const meta14 = document.querySelector('#group-14 .mass-meta');
-    if (meta115) meta115.textContent = `5 bandejas / batch (${baseDoughSize}kg farinha)`;
-    if (meta14) meta14.textContent = `5 bandejas / batch (${baseDoughSize}kg farinha)`;
+    if (meta115) meta115.textContent = `5 bandejas / batch (10kg farinha)`;
+    if (meta14) meta14.textContent = `5 bandejas / batch (10kg farinha)`;
 
     // Ler quantidades de bandejas
     const qty = {};
