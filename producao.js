@@ -18,10 +18,18 @@ const FASES_INICIAIS = [
             'Balança: peso no centro — conferir e documentar',
             'Balança: peso nas extremidades — conferir e documentar (pesos próprios)',
             { t: 'Termômetros: copo com água e gelo por 5 min — estabilizar entre 0,0 °C e 1,0 °C',
-              campos: [{ id: 'leitura', rotulo: 'Leitura do termômetro', unidade: '°C' }] },
+              campos: [{ id: 'leitura', rotulo: 'Leitura do termômetro', unidade: '°C', min: 0, max: 1,
+                aviso: 'Fora da faixa de calibração (0,0 °C a 1,0 °C). Recalibre ou substitua o termômetro.' }] },
             'Temporizador da batedeira: zerar e acionar junto ao cronômetro — conferir tempos e registrar',
             { t: 'Água: mergulhar a fita, comparar as cores, registrar e colar no controle',
-              campos: [{ id: 'ph', rotulo: 'pH da água', unidade: '' }] },
+              campos: [
+                { id: 'ph', rotulo: 'pH da água', unidade: '', min: 6, max: 8,
+                  aviso: 'pH fora do padrão (6 a 8). Água imprópria pode prejudicar a fermentação.' },
+                { id: 'dureza', rotulo: 'Dureza', unidade: 'ppm', min: 50, max: 150,
+                  aviso: 'Dureza fora do padrão (50 a 150 ppm).' },
+                { id: 'cloro', rotulo: 'Cloro total', unidade: 'ppm', max: 1,
+                  avisoAlto: 'Cloro total acima de 1 ppm. O excesso de cloro inibe o fermento.' },
+              ] },
         ],
     },
     {
@@ -42,8 +50,10 @@ const FASES_BATIDA = [
         itens: [
             { t: 'Água da massa: tarar o balde e despejar até a quantidade exata',
               campos: [
-                { id: 'temp_agua', rotulo: 'Temp. da água', unidade: '°C' },
-                { id: 'temp_amb',  rotulo: 'Temp. ambiente', unidade: '°C' },
+                { id: 'temp_agua', rotulo: 'Temp. da água', unidade: '°C', min: 13, max: 18,
+                  aviso: 'Fora dos limites ideais (13 °C a 18 °C). Risco de problemas na taxa de fermentação do lote.' },
+                { id: 'temp_amb',  rotulo: 'Temp. ambiente', unidade: '°C', min: 20, max: 24,
+                  aviso: 'Área de produção fora de 20 °C a 24 °C. Regule o climatizador da área.' },
               ] },
             { t: 'Água do fermento: tarar, despejar, aferir a temperatura e registrar',
               campos: [{ id: 'temp_ferm', rotulo: 'Temp. da água do fermento', unidade: '°C' }] },
@@ -58,14 +68,16 @@ const FASES_BATIDA = [
         desc: 'Siga a ordem exatamente. Não é permitido reprocessar a massa.',
         itens: [
             'Despejar a água pesada no tacho e adicionar o pré-mix, mexendo',
-            'Hidratar o fermento na água do fermento, mexer, cronômetro e aguardar 2 minutos',
+            { t: 'Hidratar o fermento na água do fermento, mexer, cronômetro e aguardar 2 minutos',
+              timer: { segundos: 120, rotulo: 'Hidratação do Fermento' } },
             'Adicionar o fermento hidratado no tacho e mexer',
             'Adicionar o óleo de soja no tacho e NÃO MEXER',
             'Adicionar a farinha',
             { t: 'Após a farinha, adicionar o óleo de palma previamente pesado', tipo: 'pan' },
             'Bater 2 min em velocidade baixa e mais 4 min em velocidade alta',
             { t: 'Borrifar óleo na bancada e na tampa, retirar a massa, medir a temperatura e registrar',
-              campos: [{ id: 'temp_massa', rotulo: 'Temp. da massa', unidade: '°C' }] },
+              campos: [{ id: 'temp_massa', rotulo: 'Temp. da massa', unidade: '°C', min: 24, max: 27,
+                aviso: 'Fora das regras do comissariado (24 °C a 27 °C). Variação excessiva pode estragar a maturação e o glúten.' }] },
         ],
     },
     {
@@ -113,9 +125,15 @@ const FASES_FINAIS = [
             'Preencher o Controle de Entrada de Massa no Walk-in',
             { t: 'Descruzamento: descruzar ao atingir 4,4 °C (nunca abaixo de 0,5 °C), em até 4 h; bandeja amarela como tampa',
               campos: [
-                { id: 't_primeira', rotulo: '1ª bandeja', unidade: '°C' },
-                { id: 't_meio',     rotulo: 'Bandeja do meio', unidade: '°C' },
-                { id: 't_ultima',   rotulo: 'Última bandeja', unidade: '°C' },
+                { id: 't_primeira', rotulo: '1ª bandeja', unidade: '°C', min: 0.5, max: 4.4,
+                  avisoAlto: 'Excede os 4,4 °C máximos para descruzamento. A massa pode fermentar demais se descruzada quente!',
+                  avisoBaixo: 'Abaixo de 0,5 °C: risco de congelamento localizado e morte do fermento.' },
+                { id: 't_meio',     rotulo: 'Bandeja do meio', unidade: '°C', min: 0.5, max: 4.4,
+                  avisoAlto: 'Excede os 4,4 °C máximos para descruzamento. A massa pode fermentar demais se descruzada quente!',
+                  avisoBaixo: 'Abaixo de 0,5 °C: risco de congelamento localizado e morte do fermento.' },
+                { id: 't_ultima',   rotulo: 'Última bandeja', unidade: '°C', min: 0.5, max: 4.4,
+                  avisoAlto: 'Excede os 4,4 °C máximos para descruzamento. A massa pode fermentar demais se descruzada quente!',
+                  avisoBaixo: 'Abaixo de 0,5 °C: risco de congelamento localizado e morte do fermento.' },
               ] },
             'Verificar a fermentação das amostras e liberar (não conforme → descartar o lote)',
             'Assar e descartar a amostra e registrar no relatório de produção',
@@ -140,6 +158,7 @@ const estado = {
 };
 
 let roteiro = [];           // lista plana de telas, montada a partir de estado.plano
+let prodTimerInterval = null; // cronômetro ativo (só um por vez — hidratação do fermento)
 
 function carregarEstado() {
     try {
@@ -217,6 +236,37 @@ function chaveCampo(tela, i, campoId) {
 function medicaoPreenchida(tela, i, campoId) {
     const v = estado.medicoes[chaveCampo(tela, i, campoId)];
     return v != null && v.toString().trim() !== '';
+}
+
+// Avalia uma medição contra a faixa recomendada do campo (quando houver).
+// Retorna { status:'ok'|'nok', msg } ou null quando o campo não tem faixa
+// ou o valor está vazio/inválido. Faixas baseadas no Treinamento Comissariado
+// 2026 e na ficha técnica das massas.
+function fmtFaixaNum(n) { return String(n).replace('.', ','); }
+
+function fmtRelogio(seg) {
+    const m = Math.floor(seg / 60);
+    const s = seg % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function avaliarCampo(campo, valor) {
+    if (!campo || (campo.min == null && campo.max == null)) return null;
+    const v = parseFloat(String(valor).replace(',', '.'));
+    if (isNaN(v)) return null;
+    const un = campo.unidade ? ' ' + campo.unidade : '';
+    const faixa = (campo.min != null && campo.max != null)
+        ? `${fmtFaixaNum(campo.min)} a ${fmtFaixaNum(campo.max)}${un}`
+        : (campo.max != null
+            ? `até ${fmtFaixaNum(campo.max)}${un}`
+            : `a partir de ${fmtFaixaNum(campo.min)}${un}`);
+    if (campo.max != null && v > campo.max) {
+        return { status: 'nok', msg: campo.avisoAlto || campo.aviso || `Acima do recomendado (${faixa}).` };
+    }
+    if (campo.min != null && v < campo.min) {
+        return { status: 'nok', msg: campo.avisoBaixo || campo.aviso || `Abaixo do recomendado (${faixa}).` };
+    }
+    return { status: 'ok', msg: `Dentro da faixa recomendada (${faixa}).` };
 }
 
 function telaCompleta(idx) {
@@ -318,6 +368,7 @@ function construirModal() {
 // ─── 6. RENDER ────────────────────────────────────────────────────────────────
 
 function renderizar() {
+    pararTimerAtivo();
     if (!roteiro.length) { renderVazio(); return; }
     const tela = roteiro[estado.cursor];
     if (tela.grupo === 'relatorio') renderRelatorio();
@@ -344,6 +395,7 @@ function renderVazio() {
 }
 
 function renderFase() {
+    pararTimerAtivo();
     const tela = roteiro[estado.cursor];
     const body = document.getElementById('prod-body');
     const visiveis = itensVisiveis(tela);
@@ -355,14 +407,25 @@ function renderFase() {
             <div class="prod-meas">
                 ${it.campos.map((c) => {
                     const v = estado.medicoes[chaveCampo(tela, it._i, c.id)] || '';
+                    const av = avaliarCampo(c, v);
                     return `<div class="prod-meas-field ${v.toString().trim() === '' ? 'is-empty' : ''}">
                         <label>${c.rotulo}</label>
                         <div class="prod-meas-input">
                             <input type="number" inputmode="decimal" step="0.1" data-i="${it._i}" data-campo="${c.id}" value="${v}" placeholder="—">
                             ${c.unidade ? `<span>${c.unidade}</span>` : ''}
                         </div>
+                        <div class="prod-meas-alert ${av ? 'is-' + av.status : ''}" ${av ? '' : 'hidden'}>${av ? (av.status === 'ok' ? '✅ ' : '⚠️ ') + av.msg : ''}</div>
                     </div>`;
                 }).join('')}
+            </div>` : '';
+        const timerHtml = it.timer ? `
+            <div class="prod-timer" data-seg="${it.timer.segundos}">
+                <span class="prod-timer-label">${it.timer.rotulo}</span>
+                <span class="prod-timer-display">${fmtRelogio(it.timer.segundos)}</span>
+                <div class="prod-timer-controls">
+                    <button type="button" class="btn prod-timer-start">▶ Iniciar</button>
+                    <button type="button" class="btn btn-secondary prod-timer-reset">Zerar</button>
+                </div>
             </div>` : '';
         return `
             <div class="prod-item-wrap">
@@ -372,6 +435,7 @@ function renderFase() {
                     <span class="prod-item-text">${it.t}</span>
                 </label>
                 ${camposHtml}
+                ${timerHtml}
             </div>`;
     }).join('');
 
@@ -416,12 +480,93 @@ function renderFase() {
             estado.medicoes[chaveCampo(tela, i, campo)] = inp.value;
             const field = inp.closest('.prod-meas-field');
             if (field) field.classList.toggle('is-empty', inp.value.trim() === '');
+            const cDef = (visiveis.find((x) => x._i === i)?.campos || []).find((x) => x.id === campo);
+            const alertEl = field ? field.querySelector('.prod-meas-alert') : null;
+            if (alertEl) {
+                const av = avaliarCampo(cDef, inp.value);
+                alertEl.classList.remove('is-ok', 'is-nok');
+                if (av) {
+                    alertEl.classList.add('is-' + av.status);
+                    alertEl.hidden = false;
+                    alertEl.textContent = (av.status === 'ok' ? '✅ ' : '⚠️ ') + av.msg;
+                } else {
+                    alertEl.hidden = true;
+                    alertEl.textContent = '';
+                }
+            }
             salvarEstado();
             atualizarUI();
         });
     });
 
+    body.querySelectorAll('.prod-timer').forEach(montarTimer);
+
     body.scrollTop = 0;
+}
+
+function pararTimerAtivo() {
+    if (prodTimerInterval) { clearInterval(prodTimerInterval); prodTimerInterval = null; }
+}
+
+function bipTimer() {
+    try {
+        const ac = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ac.createOscillator();
+        const gain = ac.createGain();
+        osc.connect(gain); gain.connect(ac.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ac.currentTime);
+        gain.gain.setValueAtTime(0, ac.currentTime);
+        gain.gain.linearRampToValueAtTime(0.4, ac.currentTime + 0.1);
+        gain.gain.linearRampToValueAtTime(0, ac.currentTime + 0.6);
+        osc.start(ac.currentTime);
+        osc.stop(ac.currentTime + 0.6);
+    } catch (_) { /* sem áudio disponível */ }
+}
+
+// Cronômetro regressivo embutido (usado na hidratação do fermento).
+function montarTimer(wrap) {
+    const total = parseInt(wrap.dataset.seg, 10) || 120;
+    const disp = wrap.querySelector('.prod-timer-display');
+    const btnStart = wrap.querySelector('.prod-timer-start');
+    const btnReset = wrap.querySelector('.prod-timer-reset');
+    let restante = total;
+    let rodando = false;
+
+    const pintar = () => { disp.textContent = fmtRelogio(restante); };
+    const parar = () => {
+        pararTimerAtivo();
+        rodando = false;
+        btnStart.textContent = '▶ Iniciar';
+        wrap.classList.remove('is-running');
+    };
+
+    btnStart.addEventListener('click', () => {
+        if (rodando) { parar(); return; }
+        pararTimerAtivo();            // garante que só um timer roda por vez
+        if (restante <= 0) { restante = total; wrap.classList.remove('is-done'); }
+        rodando = true;
+        btnStart.textContent = '⏸ Pausar';
+        wrap.classList.add('is-running');
+        prodTimerInterval = setInterval(() => {
+            restante -= 1;
+            pintar();
+            if (restante <= 0) {
+                parar();
+                wrap.classList.add('is-done');
+                bipTimer();
+            }
+        }, 1000);
+    });
+
+    btnReset.addEventListener('click', () => {
+        parar();
+        restante = total;
+        wrap.classList.remove('is-done');
+        pintar();
+    });
+
+    pintar();
 }
 
 function renderRelatorio() {
@@ -710,6 +855,7 @@ function abrirModal() {
 }
 
 function fecharModal() {
+    pararTimerAtivo();
     document.getElementById('prod-overlay').hidden = true;
     document.body.style.overflow = '';
 }
