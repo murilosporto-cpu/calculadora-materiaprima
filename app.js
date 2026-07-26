@@ -184,6 +184,136 @@ function calculateIngredients() {
     setBar(bars.premix,  totalPremix);
     setBar(bars.yeast,   totalYeast);
     setBar(bars.palmoil, totalPalmOil);
+
+    // ── GERAÇÃO DE SUGESTÕES INTELIGENTES (SMART SUGGESTIONS) ──
+    const suggestionsPanel = document.getElementById('suggestions-panel');
+    const suggestionsContent = document.getElementById('suggestions-content');
+
+    if (suggestionsPanel && suggestionsContent) {
+        let suggestionsHTML = '';
+
+        // Analisar Massa Tradicional
+        if (pesoTrad > 0) {
+            const batchSize = BATCH_TRADICIONAL.total;
+            const currentBatches = pesoTrad / batchSize;
+            const targetFloor = Math.floor(currentBatches);
+            const targetCeil = Math.ceil(currentBatches);
+            
+            // Proximidade de fração para sugestões
+            const fraction = currentBatches - targetFloor;
+
+            if (fraction > 0.01) {
+                suggestionsHTML += `<div style="margin-bottom: 0.5rem;"><strong style="color: var(--amber);">Massa Tradicional (${currentBatches.toFixed(2).replace('.', ',')} batidas):</strong></div>`;
+
+                // Sugestão 1: Reduzir para a batida inteira anterior (Floor)
+                // Quanto de peso a menos precisamos
+                const diffWeightFloor = pesoTrad - (targetFloor * batchSize);
+                const floorOptions = getTrayCombinationSuggestions(diffWeightFloor);
+                
+                // Sugestão 2: Aumentar para a próxima batida inteira (Ceil)
+                const diffWeightCeil = (targetCeil * batchSize) - pesoTrad;
+                const ceilOptions = getTrayCombinationSuggestions(diffWeightCeil);
+
+                if (targetFloor > 0) {
+                    suggestionsHTML += `
+                        <div class="suggestion-item">
+                            <span class="suggestion-bullet">▼</span>
+                            <span class="suggestion-text">Para economizar insumos e bater exatamente <strong>${targetFloor} batida(s)</strong>, você pode produzir <strong>menos</strong>: ${floorOptions}</span>
+                        </div>
+                    `;
+                }
+                
+                suggestionsHTML += `
+                    <div class="suggestion-item">
+                        <span class="suggestion-bullet">▲</span>
+                        <span class="suggestion-text">Para aproveitar o lote e fechar exatamente <strong>${targetCeil} batida(s)</strong> sem sobras, você pode produzir <strong>a mais</strong>: ${ceilOptions}</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Analisar Massa Pan
+        if (pesoPan > 0) {
+            const batchSize = BATCH_PAN.total;
+            const currentBatches = pesoPan / batchSize;
+            const targetFloor = Math.floor(currentBatches);
+            const targetCeil = Math.ceil(currentBatches);
+            const fraction = currentBatches - targetFloor;
+
+            if (fraction > 0.01) {
+                if (suggestionsHTML !== '') {
+                    suggestionsHTML += `<div style="height: 1px; background: rgba(255,255,255,0.05); margin: 0.75rem 0;"></div>`;
+                }
+                suggestionsHTML += `<div style="margin-bottom: 0.5rem;"><strong style="color: var(--pan-color);">Massa Pan (${currentBatches.toFixed(2).replace('.', ',')} batidas):</strong></div>`;
+
+                const diffWeightFloor = pesoPan - (targetFloor * batchSize);
+                const floorPanTrays = Math.round(diffWeightFloor / MASSA_SPECS.pan.pesoPorBandeja);
+                
+                const diffWeightCeil = (targetCeil * batchSize) - pesoPan;
+                const ceilPanTrays = Math.round(diffWeightCeil / MASSA_SPECS.pan.pesoPorBandeja);
+
+                if (targetFloor > 0 && floorPanTrays > 0) {
+                    suggestionsHTML += `
+                        <div class="suggestion-item">
+                            <span class="suggestion-bullet">▼</span>
+                            <span class="suggestion-text">Para bater exatamente <strong>${targetFloor} batida(s) Pan</strong>, reduza <strong>${floorPanTrays} bandeja(s) Pan</strong>.</span>
+                        </div>
+                    `;
+                }
+                if (ceilPanTrays > 0) {
+                    suggestionsHTML += `
+                        <div class="suggestion-item">
+                            <span class="suggestion-bullet">▲</span>
+                            <span class="suggestion-text">Para fechar exatamente <strong>${targetCeil} batida(s) Pan</strong>, adicione mais <strong>${ceilPanTrays} bandeja(s) Pan</strong>.</span>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        if (suggestionsHTML !== '') {
+            suggestionsContent.innerHTML = suggestionsHTML;
+            suggestionsPanel.style.display = 'flex';
+        } else {
+            suggestionsPanel.style.display = 'none';
+        }
+    }
+}
+
+// Função auxiliar para converter um determinado peso residual em opções de bandejas tradicionais
+function getTrayCombinationSuggestions(targetWeight) {
+    // Especificações tradicionais
+    const options = [
+        { name: 'massa 7"', weight: MASSA_SPECS['7'].pesoPorBandeja },
+        { name: 'massa 8.5"', weight: MASSA_SPECS['85'].pesoPorBandeja },
+        { name: 'massa 11.5"', weight: MASSA_SPECS['115'].pesoPorBandeja },
+        { name: 'massa 14"', weight: MASSA_SPECS['14'].pesoPorBandeja }
+    ];
+
+    let suggestions = [];
+    
+    // 1. Procurar correspondência direta simples (1 única bandeja de algum tipo)
+    for (const opt of options) {
+        const trays = targetWeight / opt.weight;
+        if (Math.abs(trays - Math.round(trays)) < 0.1) {
+            const num = Math.round(trays);
+            if (num > 0) {
+                suggestions.push(`<strong>${num} bandeja(s) de ${opt.name}</strong>`);
+            }
+        }
+    }
+
+    // Se não encontrou nenhuma de forma aproximada, traz as opções de cada uma
+    if (suggestions.length === 0) {
+        for (const opt of options) {
+            const trays = Math.round(targetWeight / opt.weight);
+            if (trays > 0) {
+                suggestions.push(`<strong>${trays} de ${opt.name}</strong>`);
+            }
+        }
+    }
+
+    return suggestions.join(' ou ');
 }
 
 // ─── 5. EVENT LISTENERS ──────────────────────────────────────────────────────
