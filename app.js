@@ -280,40 +280,41 @@ function calculateIngredients() {
     }
 }
 
-// Função auxiliar para converter um determinado peso residual em opções de bandejas tradicionais
 function getTrayCombinationSuggestions(targetWeight) {
     // Especificações tradicionais
-    const options = [
-        { name: 'massa 7"', weight: MASSA_SPECS['7'].pesoPorBandeja },
-        { name: 'massa 8.5"', weight: MASSA_SPECS['85'].pesoPorBandeja },
-        { name: 'massa 11.5"', weight: MASSA_SPECS['115'].pesoPorBandeja },
-        { name: 'massa 14"', weight: MASSA_SPECS['14'].pesoPorBandeja }
-    ];
+    const specs = {
+        '7': MASSA_SPECS['7'].pesoPorBandeja,
+        '85': MASSA_SPECS['85'].pesoPorBandeja,
+        '115': MASSA_SPECS['115'].pesoPorBandeja,
+        '14': MASSA_SPECS['14'].pesoPorBandeja
+    };
 
     let suggestions = [];
-    
-    // 1. Procurar correspondência direta simples (1 única bandeja de algum tipo)
-    for (const opt of options) {
-        const trays = targetWeight / opt.weight;
-        if (Math.abs(trays - Math.round(trays)) < 0.1) {
-            const num = Math.round(trays);
-            if (num > 0) {
-                suggestions.push(`<strong>${num} bandeja(s) de ${opt.name}</strong>`);
-            }
-        }
+
+    // Calcular quantidade equivalente direta para cada tamanho de massa
+    const qty7   = Math.round(targetWeight / specs['7']);
+    const qty85  = Math.round(targetWeight / specs['85']);
+    const qty115 = Math.round(targetWeight / specs['115']);
+    const qty14  = Math.round(targetWeight / specs['14']);
+
+    // Sugere a combinação correspondente
+    if (qty115 > 0) {
+        suggestions.push(`<strong>${qty115} bandeja(s) de massa 11.5"</strong>`);
+    }
+    if (qty14 > 0) {
+        suggestions.push(`<strong>${qty14} bandeja(s) de massa 14"</strong>`);
     }
 
-    // Se não encontrou nenhuma de forma aproximada, traz as opções de cada uma
-    if (suggestions.length === 0) {
-        for (const opt of options) {
-            const trays = Math.round(targetWeight / opt.weight);
-            if (trays > 0) {
-                suggestions.push(`<strong>${trays} de ${opt.name}</strong>`);
-            }
-        }
+    // Se o peso for compatível com 7 ou 8.5, sugere também elas ou a conversão equivalente
+    if (qty7 > 0) {
+        suggestions.push(`<strong>${qty7} bandeja(s) de massa 7"</strong>`);
+    }
+    if (qty85 > 0) {
+        suggestions.push(`<strong>${qty85} bandeja(s) de massa 8.5"</strong>`);
     }
 
-    return suggestions.join(' ou ');
+    // Retorna as opções formatadas
+    return suggestions.slice(0, 3).join(' ou ');
 }
 
 // ─── 5. EVENT LISTENERS ──────────────────────────────────────────────────────

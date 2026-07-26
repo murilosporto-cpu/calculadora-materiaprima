@@ -821,7 +821,7 @@ body {
 }
 
 .suggestion-text strong {
-    color: #ffffff;
+    color: var(--amber);
 }
 
 @keyframes fadeIn {
