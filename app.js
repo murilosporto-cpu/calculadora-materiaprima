@@ -498,6 +498,7 @@ function obterPlanoProducao() {
 
     const selectBatchSize = document.getElementById('select-batch-size');
     const farinhaLoteBase = selectBatchSize ? parseFloat(selectBatchSize.value) : 10;
+    const val = (id) => (document.getElementById(id) || {}).textContent || '0';
 
     return {
         qty,
